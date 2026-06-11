@@ -8,18 +8,20 @@ Hebrew math practice app for three specific kids (נעה/noa — 3rd grade, רז
 
 ## Commands
 
-- **Run tests:** `node _logic_test.js` — extracts the pure-logic section out of `index.html` and validates exercise generation (thousands of exercises per type: no negative subtraction results, no division remainders, choice options contain the answer exactly once) plus the adaptive level/reinforce state machine. Run this after any change to `CONFIG` or the exercise generators.
+- **Run tests:** `node _logic_test.js` — extracts the pure-logic section out of `index.html` and validates exercise generation (thousands of exercises per type: no negative subtraction results, no division remainders, choice options contain the answer exactly once) plus the adaptive level/reinforce state machine. Its migration test also executes the **entire** `<script>` under Node with browser stubs, so it doubles as a syntax check for the DOM code. Run after any change to `index.html`.
+- **Visually verify new exercise visuals** (SVG, hints): generate a temp gallery page from the extracted logic (small Node script that calls `genExercise`/`angleSVG`/`shapeSVG` and writes sample HTML), screenshot it with headless Edge, then delete the temp files. Deep levels can't be reached via the URL hash, so this is the way to see late-level content without playing through.
 - **Open the app:** `Start-Process index.html`, or in a browser at https://dyfroman.github.io/math-app/.
 - **Render smoke test:** headless Edge screenshot, e.g.
   `& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless --disable-gpu --window-size=480,860 --screenshot=out.png "file:///C:/Users/dyfro/Desktop/math-app/index.html#noa"`
   The URL hash (`#noa`, `#raz`, `#tzuri`) deep-links straight into a profile's game screen — used both for testing and as a feature.
 - **Deploy:** push to `main`. GitHub Pages (repo `dyfroman/math-app`) serves the branch root automatically. `gh` CLI is **not** installed; GitHub API calls work via the token from `git credential fill`.
+- **Hebrew commit messages:** avoid ASCII double quotes (`"`) inside the message — even in a single-quoted PowerShell here-string, embedded `"` breaks native argument quoting for `git commit -m` (Windows PowerShell 5.1) and the text after the quote is parsed as a pathspec. Rephrase or use Hebrew gershayim (״) instead.
 
 ## Architecture
 
 Everything lives in the single `<script>` block of `index.html`, split in two by comment markers:
 
-1. **Pure logic** between `==LOGIC-START==` and `==LOGIC-END==` — `CONFIG`, `TYPE_NAMES`, `genExercise(type, easy)`, `updateProgress(...)`, `chooseType(...)`, `defaultState()`. This section must stay free of `document`/`window`/`localStorage` references: `_logic_test.js` extracts it by those markers and runs it under Node via `eval`. New helper functions used by generators belong here.
+1. **Pure logic** between `==LOGIC-START==` and `==LOGIC-END==` — `CONFIG`, `TYPE_NAMES`, `genExercise(type, easy)`, `updateProgress(...)`, `chooseType(...)`, `defaultState(profile)`. This section must stay free of `document`/`window`/`localStorage` references: `_logic_test.js` extracts it by those markers and runs it under Node via `eval`. New helper functions used by generators belong here.
 2. **DOM/interaction code** below the end marker — screens, rendering, sounds (Web Audio, generated in code — no audio files), effects, parent dashboard.
 
 Key design points that span the file:
