@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Hebrew math practice app for three specific kids (נעה/noa — 3rd grade, רז/raz — 1st grade, צורי/tzuri — kindergarten). The entire app is a single `index.html` file (HTML + CSS + JS, no external dependencies, works offline from `file://`). All UI text is Hebrew, feminine address forms ("נסי", "לחצי").
+Hebrew math practice app for three specific kids (נעה/noa — 3rd grade, רז/raz — 1st grade, צורי/tzuri — kindergarten). Plain HTML/CSS/JS with no frameworks or build step: `index.html` (markup + all JS), `style.css`, `assets/` (images + fonts). Works offline from `file://`; no network dependencies at runtime. All UI text is Hebrew, feminine address forms ("נסי", "לחצי").
 
 ## Commands
 
@@ -12,14 +12,17 @@ Hebrew math practice app for three specific kids (נעה/noa — 3rd grade, רז
 - **Visually verify new exercise visuals** (SVG, hints): generate a temp gallery page from the extracted logic (small Node script that calls `genExercise`/`angleSVG`/`shapeSVG` and writes sample HTML), screenshot it with headless Edge, then delete the temp files. Deep levels can't be reached via the URL hash, so this is the way to see late-level content without playing through.
 - **Open the app:** `Start-Process index.html`, or in a browser at https://dyfroman.github.io/math-app/.
 - **Render smoke test:** headless Edge screenshot, e.g.
-  `& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless --disable-gpu --window-size=480,860 --screenshot=out.png "file:///C:/Users/dyfro/Desktop/math-app/index.html#noa"`
-  The URL hash (`#noa`, `#raz`, `#tzuri`) deep-links straight into a profile's game screen — used both for testing and as a feature.
+  `& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless --disable-gpu --window-size=480,860 --virtual-time-budget=4000 --screenshot=out.png "file:///C:/Users/dyfro/Desktop/math-app/index.html#noa"`
+  The URL hash (`#noa`, `#raz`, `#tzuri`) deep-links straight into a profile's game screen — used both for testing and as a feature. **Always pass `--virtual-time-budget=4000`:** without it, screenshots freeze CSS animations at an early frame (e.g. the card's entry animation makes it look half-transparent) and you'll chase phantom styling bugs.
+- **Screenshot states you can't deep-link to** (journey map, celebrate screen, mid-track levels): write a tiny Node script that copies `index.html` to a temp file, patching the load handler — replace `if (CONFIG.profiles[h]) startChild(h);` with a version that also sets state and opens the screen, e.g. `{ startChild(h); st.level = 4; openJourney(); }` or `{ startChild(h); st.session = {done: 10, correct: 8}; endSession(); }` — then screenshot the temp file and delete it.
 - **Deploy:** push to `main`. GitHub Pages (repo `dyfroman/math-app`) serves the branch root automatically. `gh` CLI is **not** installed; GitHub API calls work via the token from `git credential fill`.
 - **Hebrew commit messages:** avoid ASCII double quotes (`"`) inside the message — even in a single-quoted PowerShell here-string, embedded `"` breaks native argument quoting for `git commit -m` (Windows PowerShell 5.1) and the text after the quote is parsed as a pathspec. Rephrase or use Hebrew gershayim (״) instead.
 
 ## Architecture
 
-The app is `index.html` (markup + JS) plus `style.css` (all styling) and `assets/` (theme images + self-hosted Rubik woff2 fonts, all generated via Canva/Adobe MCP — total ~750KB, keep backgrounds ≤400KB JPG and mascots ≤200KB PNG). Everything still works offline from `file://`; if asset files are missing the app degrades gracefully (gradient backgrounds, no mascot, system font).
+The app is `index.html` (markup + JS) plus `style.css` (all styling) and `assets/` (theme images + self-hosted Rubik woff2 fonts — total ~750KB, keep backgrounds ≤400KB JPG and mascots ≤200KB PNG). If asset files are missing the app degrades gracefully (gradient backgrounds, no mascot via `onerror`, system font).
+
+**Regenerating assets** (Canva + Adobe MCP connectors): backgrounds are Canva `generate-design` with `design_type: phone_wallpaper` (prompt must demand "no text, empty calm middle" so cards stay readable), exported as JPG ~1700px; mascots are `instagram_post` sticker-style characters on a plain white background. Generated candidates often sneak in text/frames — export and eyeball each one, try the next candidate if bad. Canva's "transparent" PNG export keeps the white painted inside the illustration, so run Adobe `image_remove_background` on every mascot; Adobe rejects `export-download.canva.com` URLs (domain not whitelisted), so first upload the local file via `asset_initialize_file_upload` → curl PUT (`-T file`, one call per file — parallel `--data-binary @file` jobs fail in git-bash) → `asset_finalize_file_upload`, and pass the resulting presigned URL. Downscale mascots to 400×400 (PowerShell System.Drawing works) before committing.
 
 **Theming:** each child has an adventure world — noa=space (מסע בין כוכבים), raz=forest (יער הקסמים), tzuri=farm (חוות החיות). The `THEMES` object (DOM section of `index.html`) maps profile id → world name, background image, mascot poses (happy/cheer PNGs), journey-map node icons, and praise strings. `applyTheme(id)` sets `body[data-theme]`; all colors flow through CSS variables (`--accent`, `--accent-soft`, `--accent-ink`, `--key-shadow`, `--page-ink`, …) defined per theme in `style.css`. The background image sits on a fixed `body::before` layer (not `background-attachment:fixed`, which is broken on iOS); the body gradient behind it is the no-image fallback.
 
