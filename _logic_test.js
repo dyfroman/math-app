@@ -14,7 +14,8 @@ let fails = 0;
 function assert(cond, msg) { if (!cond) { fails++; console.error('FAIL:', msg); } }
 
 const MAXES = { addsub100: 100, addsub1000: 1000, add10: 10, sub10: 10, addsub20: 20,
-  count5: 5, count10: 10, tadd5: 5, tadd10: 10 };
+  count5: 5, count10: 10, tadd5: 5, tadd10: 10,
+  addsub_4digit: 9999, addsub_tens: 100, place_value: 9 };
 
 // 1. כל סוג תרגיל, רגיל וקל, 3000 פעמים
 for (const pid in CONFIG.profiles) {
@@ -25,8 +26,13 @@ for (const pid in CONFIG.profiles) {
     for (const easy of [false, true]) {
       for (let i = 0; i < 3000; i++) {
         const ex = genExercise(type, easy);
-        assert(Number.isInteger(ex.answer), type + ': answer not integer: ' + ex.answer);
-        assert(ex.answer >= 0, type + ': negative answer ' + ex.answer + ' line=' + ex.line);
+        if (typeof ex.answer === 'string') {
+          // תשובות מחרוזת (גאומטריה) מותרות רק במצב בחירה
+          assert(ex.mode === 'choice' && ex.answer.length > 0, type + ': string answer must be choice: ' + ex.answer);
+        } else {
+          assert(Number.isInteger(ex.answer), type + ': answer not integer: ' + ex.answer);
+          assert(ex.answer >= 0, type + ': negative answer ' + ex.answer + ' line=' + ex.line);
+        }
         assert(ex.mode === 'numpad' || ex.mode === 'choice', type + ': bad mode');
         assert(typeof ex.hint === 'string' && ex.hint.length > 0, type + ': missing hint');
         if (ex.mode === 'numpad') {
@@ -38,19 +44,37 @@ for (const pid in CONFIG.profiles) {
           const vals = ex.options.map(o => o.value);
           assert(new Set(vals).size === vals.length, type + ': duplicate option values ' + vals);
         }
-        // אימות חשבוני מתוך השורה עצמה
-        if (ex.line && ex.line !== '?' && !ex.emojiLine) {
-          const m = ex.line.match(/^([\d?]+) ([+×÷−]) ([\d?]+) = ([\d?]+)$/);
-          assert(m, type + ': line format bad: "' + ex.line + '"');
-          if (m) {
-            const sub = s => s === '?' ? ex.answer : Number(s);
-            const A = sub(m[1]), B = sub(m[3]), C = sub(m[4]);
-            const op = m[2];
-            const calc = op === '+' ? A + B : op === '−' ? A - B : op === '×' ? A * B : A / B;
-            assert(calc === C, type + ': wrong math: ' + ex.line + ' (answer=' + ex.answer + ')');
-            if (op === '÷') assert(A % B === 0, type + ': division with remainder: ' + ex.line);
-            if (op === '−') assert(A - B >= 0, type + ': negative subtraction: ' + ex.line);
-          }
+        // אימות חשבוני מתוך השורה עצמה: מציבים את התשובה במקום ה-? ומחשבים את שני האגפים
+        // (תומך גם בסדר פעולות וסוגריים; שורות בלי '=' כמו עיגול וסדרות נבדקות בנפרד)
+        if (ex.line && ex.line.includes('=') && !ex.emojiLine) {
+          const expr = ex.line.replace(/,/g, '').replace(/\?/g, String(ex.answer))
+            .replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+          const parts = expr.split('=');
+          assert(parts.length === 2, type + ': line must have one "=": ' + ex.line);
+          let lv, rv;
+          try { lv = eval(parts[0]); rv = eval(parts[1]); }
+          catch (e) { assert(false, type + ': line not evaluable: ' + ex.line); continue; }
+          assert(lv === rv, type + ': wrong math: ' + ex.line + ' (answer=' + ex.answer + ')');
+          assert(Number.isInteger(lv) && lv >= 0, type + ': non-integer/negative value in: ' + ex.line);
+        }
+        // בדיקות ייעודיות לסוגים החדשים
+        if (type === 'rounding') {
+          assert(ex.answer % ex.meta.unit === 0, 'rounding: answer not multiple of unit: ' + ex.line);
+          assert(ex.answer === Math.round(ex.meta.n / ex.meta.unit) * ex.meta.unit,
+            'rounding: wrong rounding of ' + ex.meta.n + ' to ' + ex.meta.unit + ' (got ' + ex.answer + ')');
+        }
+        if (type === 'sequence') {
+          const nums = ex.line.replace(' , ?', '').split(' , ').map(Number);
+          for (let j = 1; j < nums.length; j++)
+            assert(nums[j] - nums[j - 1] === ex.meta.diff, 'sequence: uneven jumps: ' + ex.line);
+          assert(ex.answer === nums[nums.length - 1] + ex.meta.diff, 'sequence: wrong next: ' + ex.line);
+        }
+        if (type === 'place_value') {
+          assert(Math.floor(ex.meta.n / Math.pow(10, ex.meta.place)) % 10 === ex.answer,
+            'place_value: wrong digit of ' + ex.meta.n + ' place ' + ex.meta.place);
+        }
+        if (type === 'addsub_tens') {
+          assert(ex.answer % 10 === 0 && ex.answer <= 100, 'addsub_tens: ' + ex.line);
         }
         // גבולות טווח
         if (MAXES[type]) {
@@ -101,6 +125,47 @@ for (const pid in CONFIG.profiles) {
   }
 }
 console.log('adaptive logic: OK');
+
+// 6. מיגרציית מצב שמור: מריצים את הסקריפט המלא עם סטאבים של דפדפן
+{
+  const full = html.match(/<script>([\s\S]*)<\/script>/)[1];
+  const store = {
+    data: {
+      // מצב ישן (לפני trackVersion): רז ברמה 0 עם כוכבים וסטטיסטיקות
+      math_app_raz: JSON.stringify({ level: 0, stars: 37, bestStreak: 6, stats: { add10: { c: 20, w: 4 } } }),
+      // מצב חדש תקין של צורי — לא אמור להשתנות
+      math_app_tzuri: JSON.stringify({ level: 3, stars: 12, trackVersion: 1 })
+    },
+    getItem(k) { return Object.prototype.hasOwnProperty.call(this.data, k) ? this.data[k] : null; },
+    setItem(k, v) { this.data[k] = v; },
+    removeItem(k) { delete this.data[k]; }
+  };
+  const winStub = { addEventListener() {}, innerWidth: 400, innerHeight: 800 };
+  const docStub = {
+    getElementById() { return null; },
+    querySelectorAll() { return []; },
+    createElement() { return { style: {}, classList: { add() {}, remove() {} } }; },
+    body: { style: { setProperty() {} }, appendChild() {} }
+  };
+  const fn = new Function('window', 'document', 'localStorage', 'location',
+    full + '\n;return { loadState };');
+  const app = fn(winStub, docStub, store, { hash: '' });
+
+  const raz = app.loadState('raz');
+  assert(raz.level === 2, 'migration: raz should jump to level 2, got ' + raz.level);
+  assert(raz.trackVersion === 2, 'migration: raz trackVersion should be 2');
+  assert(raz.stars === 37, 'migration: raz stars must be kept');
+  assert(raz.bestStreak === 6, 'migration: raz bestStreak must be kept');
+  assert(raz.stats.add10.c === 20, 'migration: raz stats must be kept');
+  assert(raz.reinforce === null && raz.session.done === 0, 'migration: raz session/reinforce reset');
+
+  const noa = app.loadState('noa'); // אין state שמור — פרופיל טרי
+  assert(noa.level === 0 && noa.trackVersion === 2, 'fresh noa state with new trackVersion');
+
+  const tzuri = app.loadState('tzuri'); // גרסה תואמת — נשאר כמו שהיה
+  assert(tzuri.level === 3 && tzuri.stars === 12, 'tzuri state untouched (same version)');
+  console.log('state migration: OK');
+}
 
 if (fails) { console.error(fails + ' failures'); process.exit(1); }
 console.log('ALL TESTS PASSED');
