@@ -4,179 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>קסם החשבון ✨</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { height:100%; }
-  body {
-    font-family: "Segoe UI", "Arial Hebrew", Arial, sans-serif;
-    background: linear-gradient(160deg,#fdf2ff 0%,#e8f4ff 50%,#fff8e7 100%);
-    color:#3b2d52;
-    overflow-x:hidden;
-    user-select:none;
-  }
-  button { font-family:inherit; border:none; cursor:pointer; }
-
-  .screen { display:none; min-height:100vh; flex-direction:column; align-items:center; padding:16px; }
-  .screen.active { display:flex; }
-
-  /* ---------- home ---------- */
-  #screen-home { justify-content:center; gap:14px; }
-  .app-title { font-size:2.6rem; font-weight:800; text-align:center;
-    background:linear-gradient(90deg,#a855f7,#ec4899,#f59e0b);
-    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-  .app-sub { font-size:1.3rem; color:#7c6f93; margin-bottom:10px; }
-  .profile-btn {
-    width:min(420px,92vw); padding:18px 22px; border-radius:28px;
-    display:flex; align-items:center; gap:18px; color:#fff;
-    box-shadow:0 8px 20px rgba(80,40,140,.18);
-    transition:transform .12s; font-size:1.1rem;
-  }
-  .profile-btn:active { transform:scale(.96); }
-  .profile-btn .pe { font-size:2.8rem; background:rgba(255,255,255,.25); border-radius:50%;
-    width:64px; height:64px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .profile-btn .pn { font-size:1.7rem; font-weight:800; }
-  .profile-btn .pi { font-size:.95rem; opacity:.92; margin-top:2px; }
-  .parents-link { margin-top:26px; background:none; color:#a89cc0; font-size:.95rem;
-    text-decoration:underline; padding:10px; }
-
-  /* ---------- game top bar ---------- */
-  .topbar { width:min(560px,100%); display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-  .icon-btn { background:#fff; border-radius:16px; font-size:1.4rem; padding:8px 12px;
-    box-shadow:0 3px 8px rgba(80,40,140,.12); }
-  .chip { background:#fff; border-radius:16px; padding:8px 14px; font-weight:700; font-size:1.05rem;
-    box-shadow:0 3px 8px rgba(80,40,140,.12); display:flex; align-items:center; gap:6px; }
-  .chip.grow { margin-inline-end:auto; color:var(--accent,#a855f7); }
-  #streakChip.hot { animation:pop .4s; }
-  .level-title { color:#8a7ba8; font-size:.95rem; margin:2px 0 8px; }
-  .dots { display:flex; gap:6px; margin-bottom:10px; }
-  .dots span { width:14px; height:14px; border-radius:50%; background:#e2d9f3; }
-  .dots span.on { background:var(--accent,#a855f7); }
-
-  /* ---------- exercise card ---------- */
-  .card {
-    width:min(560px,100%); background:#fff; border-radius:30px; padding:22px 18px 26px;
-    box-shadow:0 12px 30px rgba(80,40,140,.14); text-align:center;
-    display:flex; flex-direction:column; gap:14px; align-items:center;
-    border-top:8px solid var(--accent,#a855f7);
-  }
-  .card.shake { animation:shake .4s; }
-  @keyframes shake { 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)}
-    60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
-  @keyframes pop { 50%{transform:scale(1.35)} }
-
-  .prompt { font-size:1.35rem; font-weight:700; line-height:1.5; }
-  .visual { font-size:2rem; line-height:1.4; max-width:100%; }
-  .emoji-group { display:inline-flex; flex-wrap:wrap; justify-content:center; gap:4px; max-width:300px;
-    vertical-align:middle; padding:6px; }
-  .em { font-size:2rem; position:relative; }
-  .em.crossed { opacity:.35; }
-  .em.crossed::after { content:""; position:absolute; inset:45% -2px auto; height:4px; background:#ef4444;
-    border-radius:2px; transform:rotate(-20deg); }
-  .em .cnt { position:absolute; bottom:-12px; right:0; left:0; font-size:.8rem; color:#7c3aed; font-style:normal; }
-  .em.numbered { margin-bottom:14px; }
-  .bigdigit { font-size:5.5rem; font-weight:800; color:var(--accent,#a855f7);
-    background:#f6f0ff; border-radius:24px; padding:4px 34px; display:inline-block; }
-  .bigdigit.small { font-size:3rem; padding:2px 22px; }
-
-  .exline { direction:ltr; unicode-bidi:isolate; font-size:2.6rem; font-weight:800; letter-spacing:2px;
-    display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; }
-  .exline.emoji-line { font-size:1.9rem; letter-spacing:0; }
-  .exline.long { font-size:1.8rem; letter-spacing:1px; }
-  .exline.long .ansbox { min-width:64px; height:52px; font-size:1.8rem; }
-  .ansbox { display:inline-flex; align-items:center; justify-content:center; min-width:86px; height:64px;
-    border:4px dashed var(--accent,#a855f7); border-radius:16px; background:#faf6ff; padding:0 10px;
-    font-size:2.4rem; }
-
-  .hint { display:none; background:#fff8e1; border:2px solid #fcd34d; border-radius:18px;
-    padding:12px; font-size:1.05rem; width:100%; }
-  .hint.show { display:block; animation:fadein .4s; }
-  @keyframes fadein { from{opacity:0; transform:translateY(8px)} }
-  .dotgrid { display:inline-grid; gap:5px; direction:ltr; margin-top:8px; }
-  .dot { width:13px; height:13px; border-radius:50%; background:var(--accent,#a855f7); display:inline-block; }
-  .grp { display:inline-flex; gap:4px; border:2px solid #c4b5fd; border-radius:10px; padding:5px 7px; margin:3px; }
-  .circ { display:inline-block; width:22px; height:22px; border-radius:50%; border:3px solid #a855f7; margin:2px; }
-  .circ.full { background:#a855f7; }
-
-  /* ---------- answers ---------- */
-  .numpad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(330px,100%); direction:ltr; }
-  .key { font-size:1.9rem; font-weight:800; padding:14px 0; border-radius:18px; background:#f3edff;
-    color:#4c1d95; box-shadow:0 4px 0 #ddd0f7; transition:transform .08s; min-height:62px; }
-  .key:active { transform:translateY(3px); box-shadow:none; }
-  .key.ok { background:#bbf7d0; color:#166534; box-shadow:0 4px 0 #86efac; }
-  .key.del { background:#fee2e2; color:#991b1b; box-shadow:0 4px 0 #fecaca; font-size:1.5rem; }
-
-  .choices { display:flex; flex-wrap:wrap; justify-content:center; gap:14px; width:100%; }
-  .choice { background:#f3edff; border-radius:22px; padding:14px 20px; min-width:90px; min-height:72px;
-    font-size:2.2rem; font-weight:800; color:#4c1d95; box-shadow:0 5px 0 #ddd0f7;
-    transition:transform .08s; }
-  .choice:active { transform:translateY(3px); box-shadow:none; }
-  .choice .emoji-group { max-width:200px; }
-  .choice .em { font-size:1.7rem; }
-  .choice.text { font-size:1.25rem; padding:16px 18px; }
-
-  /* ---------- feedback ---------- */
-  #feedback { min-height:42px; font-size:1.4rem; font-weight:800; }
-  #feedback.good { color:#16a34a; animation:pop .5s; }
-  #feedback.bad { color:#e05690; }
-
-  .banner { position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-    pointer-events:none; z-index:50; }
-  .banner-inner { background:rgba(255,255,255,.96); border-radius:30px; padding:30px 40px;
-    box-shadow:0 18px 50px rgba(80,40,140,.3); font-size:1.7rem; font-weight:800; text-align:center;
-    animation:bannerIn .5s; max-width:90vw; }
-  @keyframes bannerIn { from{transform:scale(.5); opacity:0} 60%{transform:scale(1.08)} }
-  .banner-inner .big { font-size:3.2rem; display:block; margin-bottom:6px; }
-
-  .starfly { position:fixed; font-size:3rem; z-index:60; pointer-events:none; animation:starfly 1s forwards; }
-  @keyframes starfly { from{transform:scale(.4); opacity:1} 70%{transform:scale(1.5) translateY(-60px); opacity:1}
-    to{transform:scale(.6) translateY(-120px); opacity:0} }
-
-  #confetti { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:70; }
-  .cf { position:absolute; top:-20px; width:12px; height:12px; border-radius:3px;
-    animation:fall linear forwards; }
-  @keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
-
-  /* ---------- celebrate ---------- */
-  #screen-celebrate { justify-content:center; gap:18px; text-align:center; }
-  .celebrate-big { font-size:4.5rem; }
-  .celebrate-title { font-size:2.2rem; font-weight:800; color:#7c3aed; }
-  .celebrate-sub { font-size:1.3rem; color:#7c6f93; }
-  .big-btn { font-size:1.4rem; font-weight:800; color:#fff; background:var(--accent,#a855f7);
-    border-radius:24px; padding:16px 36px; box-shadow:0 6px 16px rgba(124,58,237,.35); }
-  .big-btn.ghost { background:#fff; color:#7c3aed; }
-
-  /* ---------- collection ---------- */
-  .coll-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; width:min(480px,100%); margin-top:12px; }
-  .coll-item { background:#fff; border-radius:20px; padding:12px 4px; text-align:center;
-    box-shadow:0 4px 10px rgba(80,40,140,.1); }
-  .coll-item .ce { font-size:2.4rem; }
-  .coll-item .cn { font-size:.85rem; color:#7c6f93; margin-top:4px; }
-  .coll-item.locked { opacity:.45; filter:grayscale(1); }
-  .coll-progress { margin-top:14px; color:#7c6f93; font-size:1.05rem; }
-
-  /* ---------- parents ---------- */
-  #screen-parents, #screen-gate { align-items:center; }
-  .panel { width:min(640px,100%); background:#fff; border-radius:24px; padding:20px;
-    box-shadow:0 8px 24px rgba(80,40,140,.12); margin-top:14px; }
-  .panel h3 { display:flex; align-items:center; gap:8px; font-size:1.3rem; margin-bottom:8px; }
-  .stat-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0;
-    border-bottom:1px dashed #eee; font-size:.98rem; }
-  .stat-row .bar { flex:1; height:10px; background:#f1eafe; border-radius:6px; margin:0 12px; overflow:hidden; }
-  .stat-row .bar i { display:block; height:100%; background:#a855f7; border-radius:6px; }
-  .pill { display:inline-block; background:#f0fdf4; color:#15803d; border-radius:12px;
-    padding:3px 10px; margin:3px; font-size:.9rem; }
-  .pill.weak { background:#fef2f2; color:#b91c1c; }
-  .reset-btn { background:#fee2e2; color:#991b1b; border-radius:14px; padding:8px 16px; margin-top:10px; font-weight:700; }
-  .gate-box { background:#fff; border-radius:24px; padding:30px; text-align:center;
-    box-shadow:0 8px 24px rgba(80,40,140,.12); margin-top:40px; }
-  .gate-box input { font-size:1.6rem; width:120px; text-align:center; border:3px solid #ddd0f7;
-    border-radius:14px; padding:8px; margin:14px 0; }
-  .gate-q { direction:ltr; font-size:2rem; font-weight:800; color:#7c3aed; }
-  .small-note { color:#a89cc0; font-size:.85rem; margin-top:8px; }
-
-  h2.screen-title { font-size:1.8rem; color:#7c3aed; margin:8px 0; }
-  .back-row { width:min(640px,100%); display:flex; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -194,10 +22,11 @@
     <button class="icon-btn" onclick="goHome()" title="הביתה">🏠</button>
     <div class="chip grow"><span id="gName"></span> <span id="gEmoji"></span></div>
     <button class="icon-btn" onclick="openCollection()" title="האוסף שלי">🏆</button>
+    <button class="icon-btn" onclick="openJourney()" title="מפת המסע">🗺️</button>
     <div class="chip" id="streakChip">🔥 <span id="gStreak">0</span></div>
     <div class="chip">⭐ <span id="gStars">0</span></div>
   </div>
-  <div class="level-title" id="gLevel"></div>
+  <div class="level-title" id="gLevel" onclick="openJourney()" title="מפת המסע"></div>
   <div class="dots" id="sessionDots"></div>
   <div class="card" id="exCard">
     <div class="prompt" id="exPrompt"></div>
@@ -208,15 +37,25 @@
     <div class="numpad" id="numpad"></div>
     <div class="choices" id="choices"></div>
   </div>
+  <img id="mascot" class="mascot" alt="">
 </div>
 
 <!-- ================= CELEBRATE ================= -->
 <div class="screen" id="screen-celebrate">
-  <div class="celebrate-big">🎊🌟🎊</div>
+  <div class="celebrate-big" id="celebArt">🎊🌟🎊</div>
   <div class="celebrate-title" id="celebTitle"></div>
   <div class="celebrate-sub" id="celebSub"></div>
   <button class="big-btn" onclick="newSession()">עוד סיבוב! 🚀</button>
+  <button class="big-btn ghost" onclick="openJourney()">מפת המסע 🗺️</button>
   <button class="big-btn ghost" onclick="goHome()">הביתה 🏠</button>
+</div>
+
+<!-- ================= JOURNEY MAP ================= -->
+<div class="screen" id="screen-journey">
+  <div class="back-row"><button class="icon-btn" onclick="backToGame()">➡ חזרה</button></div>
+  <h2 class="screen-title" id="journeyTitle"></h2>
+  <div class="journey" id="journeyPath"></div>
+  <button class="big-btn" onclick="backToGame()">ממשיכים! 💪</button>
 </div>
 
 <!-- ================= COLLECTION ================= -->
@@ -825,6 +664,66 @@ function chooseType(profile, st) {
    חלק תצוגה ואינטראקציה
    ============================================================ */
 
+// עולם הרפתקה לכל פרופיל: רקע, דמות מלווה, אייקוני מפת מסע ומחמאות בטעם העולם.
+// הצבעים עצמם מוגדרים ב-style.css תחת body[data-theme="..."].
+const THEMES = {
+  noa: {
+    key:'space', world:'מסע בין כוכבים', worldEmoji:'🌌',
+    bg:'assets/noa-bg.jpg',
+    mascot:{ happy:'assets/noa-mascot-happy.png', cheer:'assets/noa-mascot-cheer.png' },
+    nodeIcons:{ done:'🪐', current:'🚀', locked:'🔒', final:'🏆' },
+    praise:['מעולה, אסטרונאוטית! 🚀','טסת על זה! 🌟','חישוב בין-כוכבי מושלם! 🪐','אלופת החלל! 👩‍🚀']
+  },
+  raz: {
+    key:'forest', world:'יער הקסמים', worldEmoji:'🧚',
+    bg:'assets/raz-bg.jpg',
+    mascot:{ happy:'assets/raz-mascot-happy.png', cheer:'assets/raz-mascot-cheer.png' },
+    nodeIcons:{ done:'🌸', current:'🦋', locked:'🔒', final:'🏆' },
+    praise:['קסם אמיתי! ✨','הפיות מריעות לך! 🧚','איזה יופי! 🦋','כישרון קסום! 🌟']
+  },
+  tzuri: {
+    key:'farm', world:'חוות החיות', worldEmoji:'🚜',
+    bg:'assets/tzuri-bg.jpg',
+    mascot:{ happy:'assets/tzuri-mascot-happy.png', cheer:'assets/tzuri-mascot-cheer.png' },
+    nodeIcons:{ done:'🌻', current:'🐥', locked:'🔒', final:'🏆' },
+    praise:['כל החיות שמחות! 🐮','אלופת החווה! 🐥','נכון מאוד! 🐔','יש! קוקוריקו! 🐓']
+  }
+};
+
+function applyTheme(id) {
+  const t = THEMES[id];
+  if (t) {
+    document.body.dataset.theme = t.key;
+  } else {
+    delete document.body.dataset.theme;
+  }
+  // fallback inline למקרה ש-style.css לא נטען; זהה לצבע שהערכה מגדירה
+  document.body.style.setProperty('--accent', CONFIG.profiles[id] ? CONFIG.profiles[id].color : '');
+  const m = document.getElementById('mascot');
+  if (m && t) {
+    m.style.display = '';
+    m.onerror = () => { m.style.display = 'none'; }; // בלי קובץ — פשוט בלי דמות
+    m.src = t.mascot.happy;
+    new Image().src = t.mascot.cheer; // טעינה מוקדמת לפוזת החגיגה
+  }
+}
+
+// פוזה ותגובת אנימציה של הדמות המלווה
+function setMascot(pose) {
+  const m = document.getElementById('mascot');
+  const t = THEMES[curId];
+  if (!m || !t || m.style.display === 'none') return;
+  m.src = pose === 'cheer' ? t.mascot.cheer : t.mascot.happy;
+  m.classList.remove('cheer', 'nudge');
+  void m.offsetWidth;
+  if (pose === 'cheer' || pose === 'nudge') m.classList.add(pose);
+}
+
+function clearTheme() {
+  delete document.body.dataset.theme;
+  document.body.style.removeProperty('--accent');
+}
+
 const $ = id => document.getElementById(id);
 let curId = null, st = null, ex = null, attempts = 0, typed = '', locked = false;
 
@@ -869,22 +768,24 @@ function renderHome() {
     const s = loadState(id);
     const lvl = p.levels[Math.min(s.level, p.levels.length - 1)].title;
     const btn = document.createElement('button');
+    const t = THEMES[id];
     btn.className = 'profile-btn';
-    btn.style.background = 'linear-gradient(135deg,' + p.color + ',' + p.color + 'cc)';
+    btn.style.background = 'linear-gradient(135deg,' + p.color + 'e6,' + p.color + 'b3), url(' + t.bg + ') center/cover';
     btn.innerHTML = '<span class="pe">' + p.emoji + '</span><span><div class="pn">' + p.name +
+      '</div><div class="pw">' + t.worldEmoji + ' ' + t.world +
       '</div><div class="pi">' + p.grade + ' · ⭐ ' + s.stars + ' · ' + lvl + '</div></span>';
     btn.onclick = () => startChild(id);
     wrap.appendChild(btn);
   }
 }
 
-function goHome() { saveState(); curId = null; renderHome(); showScreen('screen-home'); }
+function goHome() { saveState(); curId = null; clearTheme(); renderHome(); showScreen('screen-home'); }
 
 /* ---------- משחק ---------- */
 function startChild(id) {
   curId = id;
   st = loadState(id);
-  document.body.style.setProperty('--accent', CONFIG.profiles[id].color);
+  applyTheme(id);
   showScreen('screen-game');
   updateHud();
   nextExercise();
@@ -896,8 +797,7 @@ function updateHud() {
   $('gEmoji').textContent = p.emoji;
   $('gStars').textContent = st.stars;
   $('gStreak').textContent = st.streak;
-  $('gLevel').textContent = 'רמה: ' + p.levels[Math.min(st.level, p.levels.length - 1)].title +
-    (st.reinforce ? ' · מתאמנות על ' + TYPE_NAMES[st.reinforce.type] + ' 💪' : '');
+  renderTrail();
   const dots = $('sessionDots');
   dots.innerHTML = '';
   for (let i = 0; i < CONFIG.sessionLength; i++) {
@@ -905,6 +805,52 @@ function updateHud() {
     if (i < st.session.done) d.classList.add('on');
     dots.appendChild(d);
   }
+}
+
+// שביל מיני: נקודה לכל רמה במסלול, הנוכחית פועמת. לחיצה פותחת את מפת המסע.
+function renderTrail() {
+  const p = CONFIG.profiles[curId];
+  const cur = Math.min(st.level, p.levels.length - 1);
+  let dots = '';
+  for (let i = 0; i < p.levels.length; i++) {
+    const last = i === p.levels.length - 1;
+    if (last && i !== cur) { dots += '<span class="t final">🏆</span>'; continue; }
+    dots += '<span class="t' + (i < cur ? ' done' : i === cur ? ' cur' : '') + '"></span>';
+  }
+  $('gLevel').innerHTML = '<div class="trail">' + dots + '</div>' +
+    '<div class="trail-title">' + p.levels[cur].title +
+    (st.reinforce ? ' · מתאמנות על ' + TYPE_NAMES[st.reinforce.type] + ' 💪' : '') + '</div>';
+}
+
+/* ---------- מפת המסע ---------- */
+function openJourney(justAdvanced) {
+  if (!curId) return;
+  renderJourney(!!justAdvanced);
+  showScreen('screen-journey');
+  const c = document.querySelector('#journeyPath .jnode.current');
+  if (c) c.scrollIntoView({ block: 'center' });
+}
+
+function renderJourney(justAdvanced) {
+  const p = CONFIG.profiles[curId], t = THEMES[curId];
+  $('journeyTitle').textContent = t.worldEmoji + ' ' + t.world;
+  const wrap = $('journeyPath');
+  wrap.innerHTML = '';
+  const cur = Math.min(st.level, p.levels.length - 1);
+  p.levels.forEach((lvl, i) => {
+    const state = i < cur ? 'done' : i === cur ? 'current' : 'locked';
+    const last = i === p.levels.length - 1;
+    const icon = state === 'done' ? t.nodeIcons.done
+      : last ? t.nodeIcons.final
+      : state === 'current' ? t.nodeIcons.current : t.nodeIcons.locked;
+    const node = document.createElement('div');
+    node.className = 'jnode ' + state + (i % 2 ? ' alt' : '') +
+      (justAdvanced && i === cur ? ' just-advanced' : '');
+    node.innerHTML = '<span class="jdot">' + icon + '</span>' +
+      '<span class="jlabel">' + lvl.title + '</span>' +
+      (state === 'current' ? '<img class="jmascot" src="' + t.mascot.happy + '" onerror="this.remove()" alt="">' : '');
+    wrap.appendChild(node); // column-reverse: רמה 1 למטה, מטפסים למעלה
+  });
 }
 
 function nextExercise() {
@@ -932,6 +878,9 @@ function nextExercise() {
     renderChoices();
   }
   lineEl.style.display = (ex.mode === 'numpad' || ex.line) ? 'flex' : 'none';
+  setMascot('happy');
+  const card = $('exCard');
+  card.classList.remove('in'); void card.offsetWidth; card.classList.add('in');
   updateHud();
 }
 
@@ -973,9 +922,10 @@ function onCorrect() {
   playCorrect();
   const p = CONFIG.profiles[curId];
   const firstTry = attempts === 0;
+  let leveledUp = false;
   if (firstTry) {
     const ev = updateProgress(st, ex.type, true, p.levels.length, CONFIG);
-    if (ev.levelUp) queueBanner('🎉', 'עלית רמה!', p.levels[st.level].title);
+    if (ev.levelUp) { leveledUp = true; queueBanner('🎉', 'עלית רמה!', p.levels[st.level].title); }
     if (ev.reinforceEnd) queueBanner('💪', 'איזו אלופה!', 'חזרנו למסלול הרגיל');
     if (st.streak >= 3) { const c = $('streakChip'); c.classList.remove('hot'); void c.offsetWidth; c.classList.add('hot'); }
   }
@@ -992,19 +942,25 @@ function onCorrect() {
   if (firstTry) st.session.correct++;
   saveState();
   starFly();
+  setMascot('cheer');
   const fb = $('feedback');
-  fb.textContent = pick(['נכון! 🎉', 'מעולה! 🌟', 'איזה יופי! 💜', 'בדיוק! 🦄', 'וואו, אלופה! 🏆']);
+  fb.textContent = pick(['נכון! 🎉', 'מעולה! 🌟', 'איזה יופי! 💜', 'בדיוק! 🦄'].concat(THEMES[curId].praise));
   fb.className = 'good';
   updateHud();
   setTimeout(() => {
     if (st.session.done >= CONFIG.sessionLength) endSession();
-    else nextExercise();
+    else {
+      nextExercise();
+      // עליית רמה: אחרי הבאנר קופצים למפת המסע לראות את הנקודה החדשה נדלקת
+      if (leveledUp) setTimeout(() => openJourney(true), 1200);
+    }
   }, 1100);
 }
 
 function onWrong() {
   attempts++;
   playWrong();
+  setMascot('nudge');
   const p = CONFIG.profiles[curId];
   const card = $('exCard');
   card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
@@ -1046,7 +1002,10 @@ function endSession() {
   st.session = { done: 0, correct: 0 };
   saveState();
   confetti();
-  $('celebTitle').textContent = 'כל הכבוד, ' + CONFIG.profiles[curId].name + '! 🎉';
+  const t = THEMES[curId];
+  $('celebArt').innerHTML = '<img class="celeb-mascot" src="' + t.mascot.cheer +
+    '" onerror="this.parentNode.textContent=\'🎊🌟🎊\'" alt="">';
+  $('celebTitle').textContent = pick(t.praise) + ' כל הכבוד, ' + CONFIG.profiles[curId].name + '!';
   $('celebSub').textContent = 'סיימת ' + CONFIG.sessionLength + ' תרגילים — ' + correct +
     ' נכונים בניסיון ראשון! ⭐ יש לך כבר ' + st.stars + ' כוכבים';
   showScreen('screen-celebrate');

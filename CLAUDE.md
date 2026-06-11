@@ -19,7 +19,13 @@ Hebrew math practice app for three specific kids (נעה/noa — 3rd grade, רז
 
 ## Architecture
 
-Everything lives in the single `<script>` block of `index.html`, split in two by comment markers:
+The app is `index.html` (markup + JS) plus `style.css` (all styling) and `assets/` (theme images + self-hosted Rubik woff2 fonts, all generated via Canva/Adobe MCP — total ~750KB, keep backgrounds ≤400KB JPG and mascots ≤200KB PNG). Everything still works offline from `file://`; if asset files are missing the app degrades gracefully (gradient backgrounds, no mascot, system font).
+
+**Theming:** each child has an adventure world — noa=space (מסע בין כוכבים), raz=forest (יער הקסמים), tzuri=farm (חוות החיות). The `THEMES` object (DOM section of `index.html`) maps profile id → world name, background image, mascot poses (happy/cheer PNGs), journey-map node icons, and praise strings. `applyTheme(id)` sets `body[data-theme]`; all colors flow through CSS variables (`--accent`, `--accent-soft`, `--accent-ink`, `--key-shadow`, `--page-ink`, …) defined per theme in `style.css`. The background image sits on a fixed `body::before` layer (not `background-attachment:fixed`, which is broken on iOS); the body gradient behind it is the no-image fallback.
+
+**Journey map:** `#screen-journey` + `renderJourney()` show a vertical zigzag path of the profile's levels (column-reverse — start at bottom), with done/current/locked node states and the mascot perched on the current node. A mini trail (`renderTrail()`) replaces the plain level text in the game HUD. On level-up the map auto-opens (~2.3s after the banner) with a `just-advanced` node animation. The mascot (`#mascot`, `setMascot(pose)`) reacts in `onCorrect`/`onWrong`/`nextExercise` and stars on the celebrate screen.
+
+The JS in `index.html` is one `<script>` block, split in two by comment markers:
 
 1. **Pure logic** between `==LOGIC-START==` and `==LOGIC-END==` — `CONFIG`, `TYPE_NAMES`, `genExercise(type, easy)`, `updateProgress(...)`, `chooseType(...)`, `defaultState(profile)`. This section must stay free of `document`/`window`/`localStorage` references: `_logic_test.js` extracts it by those markers and runs it under Node via `eval`. New helper functions used by generators belong here.
 2. **DOM/interaction code** below the end marker — screens, rendering, sounds (Web Audio, generated in code — no audio files), effects, parent dashboard.
