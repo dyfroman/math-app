@@ -229,16 +229,16 @@ function bigAddSubHint(a, b, op) {
   const part = Math.floor(b / unit) * unit;
   const rest = b - part;
   if (part === 0 || rest === 0) {
-    return op === '+' ? 'נסי לספור קדימה צעד-צעד 🙂' : 'נסי לספור אחורה צעד-צעד 🙂';
+    return op === '+' ? 'נַסִּי לִסְפּוֹר קָדִימָה צַעַד-צַעַד 🙂' : 'נַסִּי לִסְפּוֹר אָחוֹרָה צַעַד-צַעַד 🙂';
   }
   const mid = op === '+' ? a + part : a - part;
-  return 'אפשר בשלבים: <span dir="ltr"><b>' + fmt(a) + ' ' + op + ' ' + fmt(part) + ' = ' + fmt(mid) +
-         '</b></span> ואז <span dir="ltr"><b>' + fmt(mid) + ' ' + op + ' ' + rest + ' = ?</b></span>';
+  return 'אֶפְשָׁר בִּשְׁלַבִּים: <span dir="ltr"><b>' + fmt(a) + ' ' + op + ' ' + fmt(part) + ' = ' + fmt(mid) +
+         '</b></span> וְאָז <span dir="ltr"><b>' + fmt(mid) + ' ' + op + ' ' + rest + ' = ?</b></span>';
 }
 
 // פירוק מספר לספרות עם שם המקום של כל ספרה, להדגשת ספרה מבוקשת
 function digitsHint(n, placeIdx) {
-  const s = String(n), names = ['אחדות', 'עשרות', 'מאות', 'אלפים'];
+  const s = String(n), names = ['אֲחָדוֹת', 'עֲשָׂרוֹת', 'מֵאוֹת', 'אֲלָפִים'];
   let cells = '';
   for (let i = 0; i < s.length; i++) {
     const p = s.length - 1 - i, hot = p === placeIdx;
@@ -246,7 +246,7 @@ function digitsHint(n, placeIdx) {
       '<span style="display:block;font-size:1.9rem;font-weight:800;' + (hot ? 'color:#e05690' : '') + '">' + s[i] + '</span>' +
       '<span style="display:block;font-size:.72rem;color:#7c6f93">' + names[p] + '</span></span>';
   }
-  return 'כל ספרה והמקום שלה:<div dir="ltr">' + cells + '</div>';
+  return 'כָּל סִפְרָה וְהַמָּקוֹם שֶׁלָּהּ:<div dir="ltr">' + cells + '</div>';
 }
 
 // ציור זווית: קרן אופקית + קרן בזווית נתונה, עם קשת (או ריבוע קטן לזווית ישרה)
@@ -278,19 +278,25 @@ function shapeSVG(name) {
 }
 
 const SHAPE_HINTS = {
-  'משולש':'למשולש יש 3 צלעות ו-3 קודקודים',
-  'ריבוע':'לריבוע 4 צלעות שוות ו-4 זוויות ישרות',
-  'מלבן':'למלבן 4 זוויות ישרות, וכל שתי צלעות נגדיות שוות',
-  'מעוין':'למעוין 4 צלעות שוות, אבל הזוויות לא ישרות',
-  'מקבילית':'במקבילית כל שתי צלעות נגדיות מקבילות ושוות',
-  'טרפז':'בטרפז יש בדיוק זוג אחד של צלעות מקבילות',
-  'עיגול':'לעיגול אין צלעות ואין פינות 🙂'
+  'משולש':'לִמְשׁוּלָּשׁ יֵשׁ 3 צְלָעוֹת וְ-3 קוֹדְקוֹדִים',
+  'ריבוע':'לְרִיבּוּעַ 4 צְלָעוֹת שָׁווֹת וְ-4 זָוִיּוֹת יְשָׁרוֹת',
+  'מלבן':'לְמַלְבֵּן 4 זָוִיּוֹת יְשָׁרוֹת, וְכָל שְׁתֵּי צְלָעוֹת נֶגְדִּיּוֹת שָׁווֹת',
+  'מעוין':'לִמְעוּיָן 4 צְלָעוֹת שָׁווֹת, אֲבָל הַזָּוִיּוֹת לֹא יְשָׁרוֹת',
+  'מקבילית':'בְּמַקְבִּילִית כָּל שְׁתֵּי צְלָעוֹת נֶגְדִּיּוֹת מַקְבִּילוֹת וְשָׁווֹת',
+  'טרפז':'בִּטְרַפֵּז יֵשׁ בְּדִיּוּק זוּג אֶחָד שֶׁל צְלָעוֹת מַקְבִּילוֹת',
+  'עיגול':'לְעִיגּוּל אֵין צְלָעוֹת וְאֵין פִּינוֹת 🙂'
+};
+
+// שמות הצורות עם ניקוד — לתצוגה בלבד (המפתחות הפנימיים נשארים בלי ניקוד)
+const SHAPE_NIK = {
+  'משולש':'מְשׁוּלָּשׁ', 'ריבוע':'רִיבּוּעַ', 'מלבן':'מַלְבֵּן', 'מעוין':'מְעוּיָן',
+  'מקבילית':'מַקְבִּילִית', 'טרפז':'טְרַפֵּז', 'עיגול':'עִיגּוּל'
 };
 
 function mulHint(a, b) {
   let sum = [];
   for (let i = 0; i < Math.min(b, 10); i++) sum.push(a);
-  return '<span dir="ltr">' + a + ' × ' + b + '</span> זה ' + b + ' פעמים ' + a +
+  return '<span dir="ltr">' + a + ' × ' + b + '</span> זֶה ' + b + ' פְּעָמִים ' + a +
     ': <span dir="ltr">' + sum.join(' + ') + '</span><br>' + dotGrid(a, b);
 }
 
@@ -303,25 +309,25 @@ function genExercise(type, easy) {
     case 'mul_easy': case 'mul_mid': case 'mul_hard': {
       const tables = type === 'mul_easy' ? [2, 5, 10] : type === 'mul_mid' ? [3, 4, 6] : [7, 8, 9];
       a = pick(tables); b = easy ? ri(1, 5) : ri(1, 10);
-      return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' × ' + b + ' = ?',
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' × ' + b + ' = ?',
         answer: a * b, hint: mulHint(a, b) };
     }
     case 'div': {
       const d = ri(2, easy ? 5 : 10), q = ri(2, easy ? 5 : 10);
       a = d * q;
-      return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' ÷ ' + d + ' = ?',
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' ÷ ' + d + ' = ?',
         answer: q,
-        hint:'חילקנו ' + a + ' נקודות לקבוצות של ' + d + '. כמה קבוצות יצאו?' + divGroups(q, d) };
+        hint:'חִילַּקְנוּ ' + a + ' נְקוּדוֹת לִקְבוּצוֹת שֶׁל ' + d + '. כַּמָּה קְבוּצוֹת יָצְאוּ?' + divGroups(q, d) };
     }
     case 'addsub100': case 'addsub1000': {
       const max = type === 'addsub100' ? (easy ? 20 : 100) : (easy ? 100 : 1000);
       if (Math.random() < 0.5) {
         a = ri(2, max - 2); b = ri(1, max - a);
-        return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' + ' + b + ' = ?',
+        return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' + ' + b + ' = ?',
           answer: a + b, hint: bigAddSubHint(a, b, '+') };
       } else {
         a = ri(3, max); b = ri(1, a - 1);
-        return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' − ' + b + ' = ?',
+        return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' − ' + b + ' = ?',
           answer: a - b, hint: bigAddSubHint(a, b, '−') };
       }
     }
@@ -329,9 +335,9 @@ function genExercise(type, easy) {
     case 'place_value': {
       const len = easy ? ri(2, 3) : ri(3, 4);
       n = ri(Math.pow(10, len - 1), Math.pow(10, len) - 1);
-      const names = ['האחדות', 'העשרות', 'המאות', 'האלפים'];
+      const names = ['הָאֲחָדוֹת', 'הָעֲשָׂרוֹת', 'הַמֵּאוֹת', 'הָאֲלָפִים'];
       const place = ri(0, len - 1);
-      return { type, mode:'numpad', prompt:'מהי ספרת ' + names[place] + ' במספר ' + fmt(n) + '?',
+      return { type, mode:'numpad', prompt:'מַהִי סִפְרַת ' + names[place] + ' בַּמִּסְפָּר ' + fmt(n) + '?',
         line:'?', answer: Math.floor(n / Math.pow(10, place)) % 10,
         meta:{ n, place }, hint: digitsHint(n, place) };
     }
@@ -340,30 +346,30 @@ function genExercise(type, easy) {
       const q = ri(2, easy ? 5 : 10);
       const c = f * q;
       const v = ri(0, 3);
-      if (v === 0) return { type, mode:'numpad', prompt:'איזה מספר חסר?', line: f + ' × ? = ' + c,
-        answer: q, hint:'אפשר להפוך את התרגיל: <span dir="ltr"><b>' + c + ' ÷ ' + f + ' = ?</b></span>' };
-      if (v === 1) return { type, mode:'numpad', prompt:'איזה מספר חסר?', line:'? × ' + f + ' = ' + c,
-        answer: q, hint:'אפשר להפוך את התרגיל: <span dir="ltr"><b>' + c + ' ÷ ' + f + ' = ?</b></span>' };
-      if (v === 2) return { type, mode:'numpad', prompt:'איזה מספר חסר?', line: c + ' ÷ ? = ' + q,
-        answer: f, hint:'אפשר להפוך את התרגיל: <span dir="ltr"><b>' + c + ' ÷ ' + q + ' = ?</b></span>' };
-      return { type, mode:'numpad', prompt:'איזה מספר חסר?', line:'? ÷ ' + f + ' = ' + q,
-        answer: c, hint:'אפשר להפוך את התרגיל: <span dir="ltr"><b>' + q + ' × ' + f + ' = ?</b></span>' };
+      if (v === 0) return { type, mode:'numpad', prompt:'אֵיזֶה מִסְפָּר חָסֵר?', line: f + ' × ? = ' + c,
+        answer: q, hint:'אֶפְשָׁר לַהֲפוֹךְ אֶת הַתַּרְגִּיל: <span dir="ltr"><b>' + c + ' ÷ ' + f + ' = ?</b></span>' };
+      if (v === 1) return { type, mode:'numpad', prompt:'אֵיזֶה מִסְפָּר חָסֵר?', line:'? × ' + f + ' = ' + c,
+        answer: q, hint:'אֶפְשָׁר לַהֲפוֹךְ אֶת הַתַּרְגִּיל: <span dir="ltr"><b>' + c + ' ÷ ' + f + ' = ?</b></span>' };
+      if (v === 2) return { type, mode:'numpad', prompt:'אֵיזֶה מִסְפָּר חָסֵר?', line: c + ' ÷ ? = ' + q,
+        answer: f, hint:'אֶפְשָׁר לַהֲפוֹךְ אֶת הַתַּרְגִּיל: <span dir="ltr"><b>' + c + ' ÷ ' + q + ' = ?</b></span>' };
+      return { type, mode:'numpad', prompt:'אֵיזֶה מִסְפָּר חָסֵר?', line:'? ÷ ' + f + ' = ' + q,
+        answer: c, hint:'אֶפְשָׁר לַהֲפוֹךְ אֶת הַתַּרְגִּיל: <span dir="ltr"><b>' + q + ' × ' + f + ' = ?</b></span>' };
     }
     case 'mental_big': {
       const v = easy ? pick([0, 2]) : ri(0, 2);
       if (v === 0) { // 2,900 + 1 / − 1
         const base = (easy ? ri(2, 9) : ri(2, 99)) * 100;
         const plus = Math.random() < 0.5;
-        return { type, mode:'numpad', prompt:'פתרי בעל-פה',
+        return { type, mode:'numpad', prompt:'פִּתְרִי בְּעַל-פֶּה',
           line: fmt(base) + (plus ? ' + 1 = ?' : ' − 1 = ?'),
           answer: plus ? base + 1 : base - 1,
-          hint: plus ? 'בדיוק אחד יותר מ-' + fmt(base) + ' 🙂' : 'בדיוק אחד פחות מ-' + fmt(base) + ' 🙂' };
+          hint: plus ? 'בְּדִיּוּק אֶחָד יוֹתֵר מִ-' + fmt(base) + ' 🙂' : 'בְּדִיּוּק אֶחָד פָּחוֹת מִ-' + fmt(base) + ' 🙂' };
       }
       if (v === 1) { // 1,200 − 60
         const base = ri(2, 12) * 100;
         const tens = ri(2, 9) * 10;
         const plus = Math.random() < 0.5;
-        return { type, mode:'numpad', prompt:'פתרי בעל-פה',
+        return { type, mode:'numpad', prompt:'פִּתְרִי בְּעַל-פֶּה',
           line: fmt(base) + (plus ? ' + ' : ' − ') + tens + ' = ?',
           answer: plus ? base + tens : base - tens,
           hint: bigAddSubHint(base, tens, plus ? '+' : '−') };
@@ -373,20 +379,20 @@ function genExercise(type, easy) {
       const whole = half * 2;
       const tensPart = Math.floor(whole / 10) * 10, ones = whole % 10;
       const hint = (Math.floor(whole / 10) % 2 === 0 && ones > 0)
-        ? 'אפשר בחלקים: חצי מ-' + tensPart + ' ועוד חצי מ-' + ones
-        : 'חלקי את ' + whole + ' לשני חלקים שווים';
-      return { type, mode:'numpad', prompt:'פתרי בעל-פה', line: whole + ' ÷ 2 = ?',
+        ? 'אֶפְשָׁר בַּחֲלָקִים: חֵצִי מִ-' + tensPart + ' וְעוֹד חֵצִי מִ-' + ones
+        : 'חַלְּקִי אֶת ' + whole + ' לִשְׁנֵי חֲלָקִים שָׁוִים';
+      return { type, mode:'numpad', prompt:'פִּתְרִי בְּעַל-פֶּה', line: whole + ' ÷ 2 = ?',
         answer: half, hint };
     }
     case 'addsub_4digit': {
       const max = easy ? 1000 : 9999;
       if (Math.random() < 0.5) {
         a = ri(100, max - 200); b = ri(100, max - a);
-        return { type, mode:'numpad', prompt:'כמה זה?', line: fmt(a) + ' + ' + fmt(b) + ' = ?',
+        return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: fmt(a) + ' + ' + fmt(b) + ' = ?',
           answer: a + b, hint: bigAddSubHint(a, b, '+') };
       }
       a = ri(500, max); b = ri(100, a - 1);
-      return { type, mode:'numpad', prompt:'כמה זה?', line: fmt(a) + ' − ' + fmt(b) + ' = ?',
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: fmt(a) + ' − ' + fmt(b) + ' = ?',
         answer: a - b, hint: bigAddSubHint(a, b, '−') };
     }
     case 'order_ops': {
@@ -396,87 +402,87 @@ function genExercise(type, easy) {
         B = ri(2, easy ? 5 : 9); C = ri(2, easy ? 5 : 9);
         const ans = easy ? ri(2, 20) : ri(10, 150);
         A = ans + B * C;
-        return { type, mode:'numpad', prompt:'שימי לב לסדר הפעולות!',
+        return { type, mode:'numpad', prompt:'שִׂימִי לֵב לְסֵדֶר הַפְּעוּלוֹת!',
           line: A + ' − ' + B + ' × ' + C + ' = ?', answer: ans,
-          hint:'כפל לפני חיסור! קודם <span dir="ltr"><b>' + B + ' × ' + C + ' = ' + (B * C) +
-            '</b></span>, ואז <span dir="ltr"><b>' + A + ' − ' + (B * C) + ' = ?</b></span>' };
+          hint:'כֶּפֶל לִפְנֵי חִיסּוּר! קֹדֶם <span dir="ltr"><b>' + B + ' × ' + C + ' = ' + (B * C) +
+            '</b></span>, וְאָז <span dir="ltr"><b>' + A + ' − ' + (B * C) + ' = ?</b></span>' };
       }
       if (v === 1) { // A + B × C
         B = ri(2, easy ? 5 : 9); C = ri(2, easy ? 5 : 9); A = easy ? ri(2, 20) : ri(10, 900);
-        return { type, mode:'numpad', prompt:'שימי לב לסדר הפעולות!',
+        return { type, mode:'numpad', prompt:'שִׂימִי לֵב לְסֵדֶר הַפְּעוּלוֹת!',
           line: A + ' + ' + B + ' × ' + C + ' = ?', answer: A + B * C,
-          hint:'כפל לפני חיבור! קודם <span dir="ltr"><b>' + B + ' × ' + C + ' = ' + (B * C) + '</b></span>' };
+          hint:'כֶּפֶל לִפְנֵי חִיבּוּר! קֹדֶם <span dir="ltr"><b>' + B + ' × ' + C + ' = ' + (B * C) + '</b></span>' };
       }
       if (v === 2) { // A + B × (C + D)
         B = ri(2, 5); C = ri(2, 30); D = ri(2, 30); A = ri(10, 900);
-        return { type, mode:'numpad', prompt:'שימי לב לסדר הפעולות!',
+        return { type, mode:'numpad', prompt:'שִׂימִי לֵב לְסֵדֶר הַפְּעוּלוֹת!',
           line: A + ' + ' + B + ' × (' + C + ' + ' + D + ') = ?', answer: A + B * (C + D),
-          hint:'קודם הסוגריים: <span dir="ltr"><b>(' + C + ' + ' + D + ') = ' + (C + D) +
-            '</b></span>, אחר כך הכפל, ובסוף החיבור' };
+          hint:'קֹדֶם הַסּוֹגְרַיִם: <span dir="ltr"><b>(' + C + ' + ' + D + ') = ' + (C + D) +
+            '</b></span>, אַחַר כָּךְ הַכֶּפֶל, וּבַסּוֹף הַחִיבּוּר' };
       }
       // A ÷ B × C — משמאל לימין
       B = pick([2, 5, 10]); const q = ri(2, 10); C = ri(2, 9); A = B * q;
-      return { type, mode:'numpad', prompt:'שימי לב לסדר הפעולות!',
+      return { type, mode:'numpad', prompt:'שִׂימִי לֵב לְסֵדֶר הַפְּעוּלוֹת!',
         line: A + ' ÷ ' + B + ' × ' + C + ' = ?', answer: q * C,
-        hint:'כפל וחילוק פותרים משמאל לימין: קודם <span dir="ltr"><b>' + A + ' ÷ ' + B + ' = ' + q + '</b></span>' };
+        hint:'כֶּפֶל וְחִילּוּק פּוֹתְרִים מִשְּׂמֹאל לְיָמִין: קֹדֶם <span dir="ltr"><b>' + A + ' ÷ ' + B + ' = ' + q + '</b></span>' };
     }
     case 'rounding': {
       const unit = easy ? 10 : pick([10, 100]);
       do { n = unit === 10 ? ri(11, 989) : ri(110, 8990); } while (n % unit === 0);
       const lo = Math.floor(n / unit) * unit, hi = lo + unit;
-      return { type, mode:'numpad', prompt:'עגלי ' + (unit === 10 ? 'לעשרות' : 'למאות'),
+      return { type, mode:'numpad', prompt:'עַגְּלִי ' + (unit === 10 ? 'לָעֲשָׂרוֹת' : 'לַמֵּאוֹת'),
         line: fmt(n) + ' ≈ ?', answer: (n - lo < unit / 2) ? lo : hi, meta:{ n, unit },
-        hint: fmt(n) + ' נמצא בין ' + fmt(lo) + ' ל-' + fmt(hi) + '. למי הוא קרוב יותר?' };
+        hint: fmt(n) + ' נִמְצָא בֵּין ' + fmt(lo) + ' לְ-' + fmt(hi) + '. לְמִי הוּא קָרוֹב יוֹתֵר?' };
     }
     case 'sequence': {
       const d = easy ? pick([2, 5, 10]) : ri(2, 15);
       const s = ri(1, 20);
       const terms = [0, 1, 2, 3].map(i => s + i * d);
-      return { type, mode:'numpad', prompt:'מה המספר הבא בסדרה?',
+      return { type, mode:'numpad', prompt:'מָה הַמִּסְפָּר הַבָּא בַּסִּדְרָה?',
         line: terms.join(' , ') + ' , ?', answer: s + 4 * d, meta:{ diff: d },
-        hint:'הקפיצה היא ' + d + ' בכל פעם: <span dir="ltr"><b>' + terms[3] + ' + ' + d + ' = ?</b></span>' };
+        hint:'הַקְּפִיצָה הִיא ' + d + ' בְּכָל פַּעַם: <span dir="ltr"><b>' + terms[3] + ' + ' + d + ' = ?</b></span>' };
     }
     case 'word3': {
       const v = ri(0, 3);
       if (v === 0) { // השוואה: פחות
         a = ri(20, easy ? 40 : 100); b = ri(5, a - 5);
         return { type, mode:'numpad',
-          prompt:'לנעה יש ' + a + ' סוכריות 🍬. לדנה יש ' + b + ' סוכריות פחות מנעה. כמה סוכריות יש לדנה?',
+          prompt:'לְנֹעָה יֵשׁ ' + a + ' סוּכָּרִיּוֹת 🍬. לְדָנָה יֵשׁ ' + b + ' סוּכָּרִיּוֹת פָּחוֹת מִנֹּעָה. כַּמָּה סוּכָּרִיּוֹת יֵשׁ לְדָנָה?',
           line:'?', answer: a - b,
-          hint:'"פחות מ..." זה חיסור: <span dir="ltr"><b>' + a + ' − ' + b + ' = ?</b></span>' };
+          hint:'"פָּחוֹת מִ..." זֶה חִיסּוּר: <span dir="ltr"><b>' + a + ' − ' + b + ' = ?</b></span>' };
       }
       if (v === 1) { // השוואה: יותר
         a = ri(20, easy ? 40 : 100); b = ri(5, easy ? 20 : 60);
         return { type, mode:'numpad',
-          prompt:'לנעה יש ' + a + ' מדבקות ✨. לרותם יש ' + b + ' מדבקות יותר מנעה. כמה מדבקות יש לרותם?',
+          prompt:'לְנֹעָה יֵשׁ ' + a + ' מַדְבֵּקוֹת ✨. לְרוֹתֶם יֵשׁ ' + b + ' מַדְבֵּקוֹת יוֹתֵר מִנֹּעָה. כַּמָּה מַדְבֵּקוֹת יֵשׁ לְרוֹתֶם?',
           line:'?', answer: a + b,
-          hint:'"יותר מ..." זה חיבור: <span dir="ltr"><b>' + a + ' + ' + b + ' = ?</b></span>' };
+          hint:'"יוֹתֵר מִ..." זֶה חִיבּוּר: <span dir="ltr"><b>' + a + ' + ' + b + ' = ?</b></span>' };
       }
       if (v === 2) { // מטבעות
         const coin = pick(easy ? [10] : [2, 5, 10]);
         const k = ri(3, easy ? 8 : 12);
         return { type, mode:'numpad',
-          prompt:'כמה מטבעות של ' + coin + ' ש״ח צריך כדי לשלם ' + (coin * k) + ' ש״ח? 💰',
+          prompt:'כַּמָּה מַטְבְּעוֹת שֶׁל ' + coin + ' ש״ח צָרִיךְ כְּדֵי לְשַׁלֵּם ' + (coin * k) + ' ש״ח? 💰',
           line:'?', answer: k,
-          hint:'זה תרגיל חילוק: <span dir="ltr"><b>' + (coin * k) + ' ÷ ' + coin + ' = ?</b></span>' };
+          hint:'זֶה תַּרְגִּיל חִילּוּק: <span dir="ltr"><b>' + (coin * k) + ' ÷ ' + coin + ' = ?</b></span>' };
       }
       a = ri(3, easy ? 5 : 10); b = ri(2, easy ? 5 : 9);
       return { type, mode:'numpad',
-        prompt:'בחבילה אחת יש ' + a + ' מדבקות. נעה קנתה ' + b + ' חבילות 🎁. כמה מדבקות יש לה?',
+        prompt:'בַּחֲבִילָה אַחַת יֵשׁ ' + a + ' מַדְבֵּקוֹת. נֹעָה קָנְתָה ' + b + ' חֲבִילוֹת 🎁. כַּמָּה מַדְבֵּקוֹת יֵשׁ לָהּ?',
         line:'?', answer: a * b,
-        hint:'זה תרגיל כפל: <span dir="ltr"><b>' + a + ' × ' + b + ' = ?</b></span>' };
+        hint:'זֶה תַּרְגִּיל כֶּפֶל: <span dir="ltr"><b>' + a + ' × ' + b + ' = ?</b></span>' };
     }
     case 'geo_angles': {
       const kinds = [
-        { name:'זווית חדה', deg: () => easy ? ri(25, 50) : ri(20, 70) },
-        { name:'זווית ישרה', deg: () => 90 },
-        { name:'זווית קהה', deg: () => easy ? ri(130, 160) : ri(110, 160) }
+        { name:'זווית חדה', nik:'זָוִית חַדָּה', deg: () => easy ? ri(25, 50) : ri(20, 70) },
+        { name:'זווית ישרה', nik:'זָוִית יְשָׁרָה', deg: () => 90 },
+        { name:'זווית קהה', nik:'זָוִית קֵהָה', deg: () => easy ? ri(130, 160) : ri(110, 160) }
       ];
       const k = pick(kinds);
-      return { type, mode:'choice', prompt:'איזו זווית זו?', visual: angleSVG(k.deg()),
+      return { type, mode:'choice', prompt:'אֵיזוֹ זָוִית זוֹ?', visual: angleSVG(k.deg()),
         answer: k.name,
-        options: shuffle(kinds.map(x => ({ label: x.name, value: x.name }))),
-        hint:'זווית ישרה היא בדיוק כמו פינה של דף 📄. קטנה ממנה — חדה, גדולה ממנה — קהה.<br>' + angleSVG(90) };
+        options: shuffle(kinds.map(x => ({ label: x.nik, value: x.name }))),
+        hint:'זָוִית יְשָׁרָה הִיא בְּדִיּוּק כְּמוֹ פִּינָה שֶׁל דַּף 📄. קְטַנָּה מִמֶּנָּה — חַדָּה, גְּדוֹלָה מִמֶּנָּה — קֵהָה.<br>' + angleSVG(90) };
     }
     case 'geo_shapes': {
       const all = easy
@@ -484,9 +490,9 @@ function genExercise(type, easy) {
         : ['משולש', 'ריבוע', 'מלבן', 'מעוין', 'מקבילית', 'טרפז'];
       const target = pick(all);
       const others = shuffle(all.filter(x => x !== target)).slice(0, 2);
-      return { type, mode:'choice', prompt:'איך קוראים לצורה הזאת?', visual: shapeSVG(target),
+      return { type, mode:'choice', prompt:'אֵיךְ קוֹרְאִים לַצּוּרָה הַזֹּאת?', visual: shapeSVG(target),
         answer: target,
-        options: shuffle([target, ...others].map(x => ({ label: x, value: x }))),
+        options: shuffle([target, ...others].map(x => ({ label: SHAPE_NIK[x], value: x }))),
         hint: SHAPE_HINTS[target] };
     }
 
@@ -496,38 +502,38 @@ function genExercise(type, easy) {
       const t1 = ri(1, lim - 1);
       if (Math.random() < 0.5) {
         const t2 = ri(1, Math.max(1, lim - t1));
-        return { type, mode:'numpad', prompt:'כמה זה?', line: (t1 * 10) + ' + ' + (t2 * 10) + ' = ?',
+        return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: (t1 * 10) + ' + ' + (t2 * 10) + ' = ?',
           answer: (t1 + t2) * 10,
-          hint: t1 + ' עשרות + ' + t2 + ' עשרות = ' + (t1 + t2) + ' עשרות' };
+          hint: t1 + ' עֲשָׂרוֹת + ' + t2 + ' עֲשָׂרוֹת = ' + (t1 + t2) + ' עֲשָׂרוֹת' };
       }
       const big = ri(2, lim), small = ri(1, big - 1);
-      return { type, mode:'numpad', prompt:'כמה זה?', line: (big * 10) + ' − ' + (small * 10) + ' = ?',
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: (big * 10) + ' − ' + (small * 10) + ' = ?',
         answer: (big - small) * 10,
-        hint: big + ' עשרות − ' + small + ' עשרות = ' + (big - small) + ' עשרות' };
+        hint: big + ' עֲשָׂרוֹת − ' + small + ' עֲשָׂרוֹת = ' + (big - small) + ' עֲשָׂרוֹת' };
     }
     case 'add10': {
       const max = easy ? 5 : 10;
       a = ri(1, max - 1); b = ri(1, max - a); e = pick(COUNT_EMOJIS);
-      return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' + ' + b + ' = ?',
-        answer: a + b, hint:'ספרי את כולם יחד:<br>' + emojiGroup(e, a) + ' + ' + emojiGroup(e, b) };
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' + ' + b + ' = ?',
+        answer: a + b, hint:'סִפְרִי אֶת כּוּלָּם יַחַד:<br>' + emojiGroup(e, a) + ' + ' + emojiGroup(e, b) };
     }
     case 'sub10': {
       const max = easy ? 5 : 10;
       a = ri(2, max); b = ri(1, a - 1); e = pick(COUNT_EMOJIS);
-      return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' − ' + b + ' = ?',
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' − ' + b + ' = ?',
         answer: a - b,
-        hint:'היו ' + a + ' ומחקנו ' + b + '. כמה נשארו בלי איקס?<br>' + emojiGroup(e, a, { crossFrom: a - b }) };
+        hint:'הָיוּ ' + a + ' וּמָחַקְנוּ ' + b + '. כַּמָּה נִשְׁאֲרוּ בְּלִי אִיקְס?<br>' + emojiGroup(e, a, { crossFrom: a - b }) };
     }
     case 'addsub20': {
       const max = easy ? 10 : 20;
       if (Math.random() < 0.5) {
         a = ri(2, max - 2); b = ri(1, max - a); e = pick(COUNT_EMOJIS);
-        return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' + ' + b + ' = ?',
-          answer: a + b, hint:'ספרי את כולם יחד:<br>' + emojiGroup(e, a) + ' + ' + emojiGroup(e, b) };
+        return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' + ' + b + ' = ?',
+          answer: a + b, hint:'סִפְרִי אֶת כּוּלָּם יַחַד:<br>' + emojiGroup(e, a) + ' + ' + emojiGroup(e, b) };
       } else {
         a = ri(3, max); b = ri(1, a - 1); e = pick(COUNT_EMOJIS);
-        return { type, mode:'numpad', prompt:'כמה זה?', line: a + ' − ' + b + ' = ?',
-          answer: a - b, hint:'כמה נשארו בלי איקס?<br>' + emojiGroup(e, a, { crossFrom: a - b }) };
+        return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' − ' + b + ' = ?',
+          answer: a - b, hint:'כַּמָּה נִשְׁאֲרוּ בְּלִי אִיקְס?<br>' + emojiGroup(e, a, { crossFrom: a - b }) };
       }
     }
     case 'complete': {
@@ -537,31 +543,31 @@ function genExercise(type, easy) {
       const ans = c - b;
       let circles = '';
       for (let i = 0; i < c; i++) circles += '<span class="circ' + (i < b ? ' full' : '') + '"></span>';
-      return { type, mode:'numpad', prompt:'איזה מספר חסר?',
+      return { type, mode:'numpad', prompt:'אֵיזֶה מִסְפָּר חָסֵר?',
         line: missingFirst ? '? + ' + b + ' = ' + c : b + ' + ? = ' + c,
         answer: ans,
-        hint:'יש בסך הכול ' + c + ' עיגולים, ו-' + b + ' כבר צבועים. כמה ריקים?<br><div style="direction:ltr">' + circles + '</div>' };
+        hint:'יֵשׁ בְּסַךְ הַכֹּל ' + c + ' עִיגּוּלִים, וְ-' + b + ' כְּבָר צְבוּעִים. כַּמָּה רֵיקִים?<br><div style="direction:ltr">' + circles + '</div>' };
     }
     case 'word': {
       const max = easy ? 10 : 20;
       if (Math.random() < 0.5) {
         a = ri(2, max - 2); b = ri(1, max - a);
         const t = pick([
-          'לרז יש ' + a + ' בלונים 🎈 והיא קיבלה עוד ' + b + '. כמה בלונים יש לה עכשיו?',
-          'בסל יש ' + a + ' תפוחים 🍎 ושמנו בו עוד ' + b + '. כמה תפוחים יש בסל?',
-          'על העץ ישבו ' + a + ' ציפורים 🐦 והגיעו עוד ' + b + '. כמה ציפורים על העץ?'
+          'לְרָז יֵשׁ ' + a + ' בַּלּוֹנִים 🎈 וְהִיא קִיבְּלָה עוֹד ' + b + '. כַּמָּה בַּלּוֹנִים יֵשׁ לָהּ עַכְשָׁו?',
+          'בַּסַּל יֵשׁ ' + a + ' תַּפּוּחִים 🍎 וְשַׂמְנוּ בּוֹ עוֹד ' + b + '. כַּמָּה תַּפּוּחִים יֵשׁ בַּסַּל?',
+          'עַל הָעֵץ יָשְׁבוּ ' + a + ' צִיפּוֹרִים 🐦 וְהִגִּיעוּ עוֹד ' + b + '. כַּמָּה צִיפּוֹרִים עַל הָעֵץ?'
         ]);
         return { type, mode:'numpad', prompt: t, line:'?', answer: a + b,
-          hint:'אפשר לכתוב את זה כתרגיל: <span dir="ltr"><b>' + a + ' + ' + b + ' = ?</b></span>' };
+          hint:'אֶפְשָׁר לִכְתּוֹב אֶת זֶה כְּתַרְגִּיל: <span dir="ltr"><b>' + a + ' + ' + b + ' = ?</b></span>' };
       } else {
         a = ri(3, max); b = ri(1, a - 1);
         const t = pick([
-          'לרז היו ' + a + ' עוגיות 🍪 והיא אכלה ' + b + '. כמה עוגיות נשארו?',
-          'על העץ היו ' + a + ' ציפורים 🐦 ו-' + b + ' עפו. כמה ציפורים נשארו?',
-          'בקופסה היו ' + a + ' צבעים 🖍️ ו-' + b + ' הלכו לאיבוד. כמה צבעים נשארו?'
+          'לְרָז הָיוּ ' + a + ' עוּגִיּוֹת 🍪 וְהִיא אָכְלָה ' + b + '. כַּמָּה עוּגִיּוֹת נִשְׁאֲרוּ?',
+          'עַל הָעֵץ הָיוּ ' + a + ' צִיפּוֹרִים 🐦 וְ-' + b + ' עָפוּ. כַּמָּה צִיפּוֹרִים נִשְׁאֲרוּ?',
+          'בַּקּוּפְסָה הָיוּ ' + a + ' צְבָעִים 🖍️ וְ-' + b + ' הָלְכוּ לְאִיבּוּד. כַּמָּה צְבָעִים נִשְׁאֲרוּ?'
         ]);
         return { type, mode:'numpad', prompt: t, line:'?', answer: a - b,
-          hint:'אפשר לכתוב את זה כתרגיל: <span dir="ltr"><b>' + a + ' − ' + b + ' = ?</b></span>' };
+          hint:'אֶפְשָׁר לִכְתּוֹב אֶת זֶה כְּתַרְגִּיל: <span dir="ltr"><b>' + a + ' − ' + b + ' = ?</b></span>' };
       }
     }
 
@@ -569,16 +575,16 @@ function genExercise(type, easy) {
     case 'count5': case 'count10': {
       const max = type === 'count5' ? 5 : 10;
       n = ri(1, easy ? Math.min(5, max) : max); e = pick(COUNT_EMOJIS);
-      return { type, mode:'choice', prompt:'כמה יש כאן?', visual: emojiGroup(e, n),
+      return { type, mode:'choice', prompt:'כַּמָּה יֵשׁ כָּאן?', visual: emojiGroup(e, n),
         answer: n, options: numOptions(n, 1, max),
-        hint:'בואי נספור יחד! לחצי על כל אחד:<br>' + emojiGroup(e, n, { numbered:true }) };
+        hint:'בּוֹאִי נִסְפּוֹר יַחַד! לַחֲצִי עַל כָּל אֶחָד:<br>' + emojiGroup(e, n, { numbered:true }) };
     }
     case 'digits': {
       n = ri(0, 9);
-      return { type, mode:'choice', prompt:'לחצי על אותו מספר 👇',
+      return { type, mode:'choice', prompt:'לַחֲצִי עַל אוֹתוֹ מִסְפָּר 👇',
         visual:'<div class="bigdigit">' + n + '</div>',
         answer: n, options: numOptions(n, 0, 9),
-        hint:'חפשי בדיוק את אותה צורה:<br><div class="bigdigit small">' + n + '</div>' };
+        hint:'חַפְּשִׂי בְּדִיּוּק אֶת אוֹתָהּ צוּרָה:<br><div class="bigdigit small">' + n + '</div>' };
     }
     case 'compare': {
       const hi = easy ? 5 : 9;
@@ -586,22 +592,22 @@ function genExercise(type, easy) {
       do { b = ri(1, hi); } while (b === a);
       e = pick(COUNT_EMOJIS);
       do { e2 = pick(COUNT_EMOJIS); } while (e2 === e);
-      return { type, mode:'choice', prompt:'לחצי איפה שיש יותר 👀',
+      return { type, mode:'choice', prompt:'לַחֲצִי אֵיפֹה שֶׁיֵּשׁ יוֹתֵר 👀',
         answer: Math.max(a, b),
         options: shuffle([
           { html: emojiGroup(e, a), value: a },
           { html: emojiGroup(e2, b), value: b }
         ]),
-        hint:'ספרי כל קבוצה:<br>' + emojiGroup(e, a, { numbered:true }) + '<br>' + emojiGroup(e2, b, { numbered:true }) };
+        hint:'סִפְרִי כָּל קְבוּצָה:<br>' + emojiGroup(e, a, { numbered:true }) + '<br>' + emojiGroup(e2, b, { numbered:true }) };
     }
     case 'tadd5': case 'tadd10': {
       const max = type === 'tadd5' ? 5 : 10;
       const lim = easy ? Math.max(2, Math.floor(max / 2)) : max;
       a = ri(1, lim - 1); b = ri(1, lim - a); e = pick(COUNT_EMOJIS);
-      return { type, mode:'choice', prompt:'כמה ביחד?', emojiLine: true,
+      return { type, mode:'choice', prompt:'כַּמָּה בְּיַחַד?', emojiLine: true,
         line: e.repeat(a) + ' + ' + e.repeat(b) + ' = ?',
         answer: a + b, options: numOptions(a + b, 1, max),
-        hint:'ספרי את כולם ביחד:<br>' + emojiGroup(e, a + b, { numbered:true }) };
+        hint:'סִפְרִי אֶת כּוּלָּם בְּיַחַד:<br>' + emojiGroup(e, a + b, { numbered:true }) };
     }
   }
   throw new Error('unknown type: ' + type);
