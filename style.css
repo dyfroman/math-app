@@ -94,6 +94,38 @@ body[data-theme="farm"]::before { background-image:url(assets/tzuri-bg.jpg); }
 .profile-btn .pi { font-size:.92rem; opacity:.92; margin-top:2px; }
 .parents-link { margin-top:26px; background:none; color:#a89cc0; font-size:.95rem;
   text-decoration:underline; padding:10px; }
+.profile-btn.add-child { background:#fff; color:var(--page-ink, #3b2d52);
+  border:3px dashed #cdb8f2; box-shadow:0 4px 14px rgba(80,40,140,.10); }
+.profile-btn.add-child .pe { background:#f3edff; color:#a855f7; }
+.profile-btn.add-child .pi { color:#a89cc0; }
+
+/* ---------- register ---------- */
+.reg-box { width:min(420px,92vw); display:flex; flex-direction:column; gap:10px;
+  background:var(--card-bg,#fff); border-radius:26px; padding:22px; margin-top:10px;
+  box-shadow:0 8px 24px rgba(80,40,140,.14); }
+.reg-label { font-weight:700; color:#3b2d52; margin-top:6px; }
+.reg-input { font-size:1.4rem; padding:12px 16px; border-radius:16px;
+  border:3px solid var(--accent,#a855f7); text-align:center; font-family:inherit; }
+.grade-grid { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.grade-btn { width:64px; height:64px; border-radius:18px; font-size:1.5rem; font-weight:800;
+  background:#f3edff; color:#4c1d95; box-shadow:0 3px 8px rgba(80,40,140,.12);
+  transition:transform .1s; }
+.grade-btn:active { transform:scale(.94); }
+.grade-btn.sel { background:var(--accent,#a855f7); color:#fff; box-shadow:0 5px 14px rgba(80,40,140,.3); }
+
+/* ---------- placement ---------- */
+#screen-placement { justify-content:flex-start; padding-top:24px; }
+.plc-head { text-align:center; margin-bottom:8px; }
+.plc-intro { font-size:1.15rem; font-weight:700; color:#3b2d52; max-width:min(420px,92vw); }
+.plc-prog { color:var(--page-muted,#7c6f93); margin-top:6px; font-weight:700; }
+.plc-head .dots { justify-content:center; margin-top:8px; }
+
+/* ---------- fractions ---------- */
+.frac-expr { font-size:2.4rem; font-weight:800; color:var(--accent,#a855f7); direction:ltr; }
+
+/* ---------- parent panel actions ---------- */
+.panel-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.del-btn { background:#fde2e2; color:#b91c1c; }
 
 /* ---------- game top bar ---------- */
 .topbar { width:min(560px,100%); display:flex; align-items:center; gap:8px; margin-bottom:6px; }

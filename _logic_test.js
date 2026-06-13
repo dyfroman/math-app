@@ -6,9 +6,9 @@ const end = html.indexOf('/* ==LOGIC-END== */');
 if (start < 0 || end < 0) { console.error('markers not found'); process.exit(1); }
 const code = html.slice(html.indexOf('*/', start) + 2, end);
 const api = (function () {
-  return eval(code + ';({ CONFIG, genExercise, updateProgress, chooseType, defaultState })');
+  return eval(code + ';({ CONFIG, genExercise, updateProgress, chooseType, defaultState, placementStartLevel })');
 })();
-const { CONFIG, genExercise, updateProgress, chooseType, defaultState } = api;
+const { CONFIG, genExercise, updateProgress, chooseType, defaultState, placementStartLevel } = api;
 
 let fails = 0;
 function assert(cond, msg) { if (!cond) { fails++; console.error('FAIL:', msg); } }
@@ -18,8 +18,8 @@ const MAXES = { addsub100: 100, addsub1000: 1000, add10: 10, sub10: 10, addsub20
   addsub_4digit: 9999, addsub_tens: 100, place_value: 9 };
 
 // 1. כל סוג תרגיל, רגיל וקל, 3000 פעמים
-for (const pid in CONFIG.profiles) {
-  const prof = CONFIG.profiles[pid];
+for (const gid in CONFIG.grades) {
+  const prof = CONFIG.grades[gid];
   const types = new Set();
   prof.levels.forEach(l => l.types.forEach(t => types.add(t)));
   for (const type of types) {
@@ -69,9 +69,20 @@ for (const pid in CONFIG.profiles) {
             assert(nums[j] - nums[j - 1] === ex.meta.diff, 'sequence: uneven jumps: ' + ex.line);
           assert(ex.answer === nums[nums.length - 1] + ex.meta.diff, 'sequence: wrong next: ' + ex.line);
         }
-        if (type === 'place_value') {
+        if (type === 'place_value' || type === 'place_big') {
           assert(Math.floor(ex.meta.n / Math.pow(10, ex.meta.place)) % 10 === ex.answer,
-            'place_value: wrong digit of ' + ex.meta.n + ' place ' + ex.meta.place);
+            type + ': wrong digit of ' + ex.meta.n + ' place ' + ex.meta.place);
+        }
+        if (type === 'area_perim') {
+          const exp = ex.meta.kind === 'area' ? ex.meta.w * ex.meta.h : 2 * (ex.meta.w + ex.meta.h);
+          assert(ex.answer === exp, 'area_perim: wrong ' + ex.meta.kind + ' for ' + ex.meta.w + 'x' + ex.meta.h);
+        }
+        if (type === 'area_triangle') {
+          assert(ex.answer === ex.meta.base * ex.meta.height / 2, 'area_triangle: wrong area ' + ex.meta.base + 'x' + ex.meta.height);
+        }
+        if (type === 'average') {
+          const sum = ex.meta.nums.reduce((s, x) => s + x, 0);
+          assert(ex.answer === sum / ex.meta.nums.length, 'average: wrong for ' + ex.meta.nums.join(','));
         }
         if (type === 'addsub_tens') {
           assert(ex.answer % 10 === 0 && ex.answer <= 100, 'addsub_tens: ' + ex.line);
@@ -91,7 +102,7 @@ console.log('exercise generation: OK');
 
 // 2. מנגנון אדפטיבי: 5 נכונות ברצף => עליית רמה
 let st = defaultState();
-const prof = CONFIG.profiles.noa;
+const prof = CONFIG.grades.g3;
 for (let i = 0; i < 5; i++) updateProgress(st, 'mul_easy', true, prof.levels.length, CONFIG);
 assert(st.level === 1, 'level up after 5 correct, got level ' + st.level);
 assert(st.consecutive === 0, 'consecutive reset after level up');
@@ -114,8 +125,8 @@ for (let i = 0; i < 10; i++) updateProgress(st, 'div', true, prof.levels.length,
 assert(st.level === prof.levels.length - 1, 'level capped at max');
 
 // 5. chooseType תמיד מחזיר סוג חוקי מכל רמה
-for (const pid in CONFIG.profiles) {
-  const p = CONFIG.profiles[pid];
+for (const gid in CONFIG.grades) {
+  const p = CONFIG.grades[gid];
   for (let lvl = 0; lvl < p.levels.length; lvl++) {
     const s = defaultState(); s.level = lvl;
     for (let i = 0; i < 200; i++) {
@@ -126,15 +137,30 @@ for (const pid in CONFIG.profiles) {
 }
 console.log('adaptive logic: OK');
 
-// 6. מיגרציית מצב שמור: מריצים את הסקריפט המלא עם סטאבים של דפדפן
+// 5b. מבחן מיקום => רמת פתיחה (פרופורציוני, חסום, לעולם לא הרמה האחרונה)
+assert(placementStartLevel(0, 6, 8) === 0, 'placement: 0 correct -> level 0');
+assert(placementStartLevel(6, 6, 8) === 6, 'placement: all correct -> levelsCount-2');
+assert(placementStartLevel(3, 6, 8) === 3, 'placement: half -> middle');
+assert(placementStartLevel(6, 6, 1) === 0, 'placement: single-level track -> 0');
+assert(placementStartLevel(6, 6, 2) === 0, 'placement: two-level track -> 0');
+for (let lc = 1; lc <= 12; lc++)
+  for (let c = 0; c <= 6; c++) {
+    const v = placementStartLevel(c, 6, lc);
+    assert(v >= 0 && v <= Math.max(0, lc - 2), 'placement out of bounds lc=' + lc + ' c=' + c + ' v=' + v);
+  }
+console.log('placement logic: OK');
+
+// 6. מיגרציית מצב שמור + מודל הילדים: מריצים את הסקריפט המלא עם סטאבים של דפדפן
 {
   const full = html.match(/<script>([\s\S]*)<\/script>/)[1];
   const store = {
     data: {
-      // מצב ישן (לפני trackVersion): רז ברמה 0 עם כוכבים וסטטיסטיקות
-      math_app_raz: JSON.stringify({ level: 0, stars: 37, bestStreak: 6, stats: { add10: { c: 20, w: 4 } } }),
-      // מצב חדש תקין של צורי — לא אמור להשתנות
-      math_app_tzuri: JSON.stringify({ level: 3, stars: 12, trackVersion: 1 })
+      'math_app_users': JSON.stringify([
+        { id: 'u1', name: 'בדיקה', gradeId: 'g1', themeKey: 'forest', emoji: '🦊' },
+        { id: 'u2', name: 'חדשה', gradeId: 'g3', themeKey: 'space', emoji: '🦄' }
+      ]),
+      // מצב ישן (trackVersion שונה): שומרים כוכבים/סטטיסטיקות, מאפסים רמה לנקודת הפתיחה
+      'math_app_user_u1': JSON.stringify({ level: 5, stars: 37, bestStreak: 6, stats: { add10: { c: 20, w: 4 } }, trackVersion: 99 })
     },
     getItem(k) { return Object.prototype.hasOwnProperty.call(this.data, k) ? this.data[k] : null; },
     setItem(k, v) { this.data[k] = v; },
@@ -145,25 +171,22 @@ console.log('adaptive logic: OK');
     getElementById() { return null; },
     querySelectorAll() { return []; },
     createElement() { return { style: {}, classList: { add() {}, remove() {} } }; },
-    body: { style: { setProperty() {} }, appendChild() {} }
+    body: { style: { setProperty() {} }, appendChild() {}, dataset: {} }
   };
   const fn = new Function('window', 'document', 'localStorage', 'location',
     full + '\n;return { loadState };');
   const app = fn(winStub, docStub, store, { hash: '' });
 
-  const raz = app.loadState('raz');
-  assert(raz.level === 2, 'migration: raz should jump to level 2, got ' + raz.level);
-  assert(raz.trackVersion === 2, 'migration: raz trackVersion should be 2');
-  assert(raz.stars === 37, 'migration: raz stars must be kept');
-  assert(raz.bestStreak === 6, 'migration: raz bestStreak must be kept');
-  assert(raz.stats.add10.c === 20, 'migration: raz stats must be kept');
-  assert(raz.reinforce === null && raz.session.done === 0, 'migration: raz session/reinforce reset');
+  const u1 = app.loadState('u1');
+  assert(u1.level === 0, 'migration: u1 resets to startLevel 0, got ' + u1.level);
+  assert(u1.trackVersion === 1, 'migration: u1 trackVersion should be 1');
+  assert(u1.stars === 37, 'migration: u1 stars must be kept');
+  assert(u1.bestStreak === 6, 'migration: u1 bestStreak must be kept');
+  assert(u1.stats.add10.c === 20, 'migration: u1 stats must be kept');
+  assert(u1.reinforce === null && u1.session.done === 0, 'migration: u1 session/reinforce reset');
 
-  const noa = app.loadState('noa'); // אין state שמור — פרופיל טרי
-  assert(noa.level === 0 && noa.trackVersion === 2, 'fresh noa state with new trackVersion');
-
-  const tzuri = app.loadState('tzuri'); // גרסה תואמת — נשאר כמו שהיה
-  assert(tzuri.level === 3 && tzuri.stars === 12, 'tzuri state untouched (same version)');
+  const u2 = app.loadState('u2'); // אין state שמור — ילד טרי
+  assert(u2.level === 0 && u2.trackVersion === 1, 'fresh u2 state with grade trackVersion');
   console.log('state migration: OK');
 }
 

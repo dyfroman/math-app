@@ -25,6 +25,36 @@
   <button class="parents-link" onclick="openGate()">להורים 🔒</button>
 </div>
 
+<!-- ================= REGISTER ================= -->
+<div class="screen" id="screen-register">
+  <div class="back-row"><button class="icon-btn" onclick="goHome()">➡ חזרה</button></div>
+  <div class="app-title" style="font-size:2rem">הרשמה ✏️</div>
+  <div class="reg-box">
+    <label class="reg-label">איך קוראים לך?</label>
+    <input id="regName" class="reg-input" type="text" maxlength="12" autocomplete="off" placeholder="השם שלך">
+    <label class="reg-label">באיזו כיתה את?</label>
+    <div class="grade-grid" id="regGrades"></div>
+    <button class="big-btn" onclick="submitRegister()">בואו נתחיל! 🚀</button>
+    <div class="small-note" id="regMsg"></div>
+  </div>
+</div>
+
+<!-- ================= PLACEMENT ================= -->
+<div class="screen" id="screen-placement">
+  <div class="plc-head">
+    <div class="plc-intro">כמה שאלות היכרות כדי להתחיל במקום הנכון 🙂</div>
+    <div class="plc-prog" id="plcProg"></div>
+    <div class="dots" id="plcDots"></div>
+  </div>
+  <div class="card" id="plcCard">
+    <div class="prompt" id="plcPrompt"></div>
+    <div class="visual" id="plcVisual"></div>
+    <div class="exline" id="plcLine"></div>
+    <div class="numpad" id="plcNumpad"></div>
+    <div class="choices" id="plcChoices"></div>
+  </div>
+</div>
+
 <!-- ================= GAME ================= -->
 <div class="screen" id="screen-game">
   <div class="topbar">
@@ -118,10 +148,50 @@ const CONFIG = {
     {e:'🦩',n:'פלמינגו'},{e:'🦔',n:'קיפודה'},{e:'🐙',n:'תמנונית'},{e:'🦢',n:'ברבורה'},
     {e:'🐿️',n:'סנאית'},{e:'🦉',n:'ינשופה'},{e:'🐝',n:'דבורה'},{e:'🐞',n:'פרת משה רבנו'}
   ],
-  profiles: {
-    noa: {
-      name:'נעה', emoji:'🐶', color:'#8b5cf6', grade:'כיתה ג׳', input:'numpad',
-      trackVersion: 2, startLevel: 0,   // מסלול לפי דף החזרה למבחן המסכם של כיתה ג׳
+  // מסלול תוכן לכל כיתה (לפי דרישות משרד החינוך). הכיתה קובעת אילו נושאים;
+  // מבחן המיקום קובע את רמת הפתיחה, והמנגנון האדפטיבי מעלה/מוריד קושי תוך כדי.
+  grades: {
+    gan: {
+      label:'גן חובה', short:'גן', input:'choice', trackVersion:1, startLevel:0,
+      levels: [
+        {title:'ספירה עד 5', types:['count5']},
+        {title:'זיהוי ספרות', types:['digits','count5']},
+        {title:'ספירה עד 10', types:['count10','digits']},
+        {title:'מה גדול יותר?', types:['compare','count10']},
+        {title:'חיבור עד 5', types:['tadd5','compare']},
+        {title:'חיבור עד 10', types:['tadd10','tadd5']},
+        {title:'הכול ביחד! 💪', types:['count10','digits','compare','tadd5','tadd10']}
+      ]
+    },
+    g1: {
+      label:'כיתה א׳', short:'א', input:'numpad', trackVersion:1, startLevel:0,
+      levels: [
+        {title:'חיבור עד 10', types:['add10']},
+        {title:'חיסור עד 10', types:['sub10','add10']},
+        {title:'חיבור וחיסור עד 20', types:['addsub20']},
+        {title:'השלמת תרגיל', types:['complete','addsub20']},
+        {title:'בעיות מילוליות', types:['word','complete']},
+        {title:'עשרות שלמות עד 100', types:['addsub_tens','addsub20']},
+        {title:'חיבור וחיסור עד 100', types:['addsub100','addsub_tens']},
+        {title:'הכול ביחד! 💪', types:['add10','sub10','addsub20','complete','word','addsub_tens','addsub100']}
+      ]
+    },
+    g2: {
+      label:'כיתה ב׳', short:'ב', input:'numpad', trackVersion:1, startLevel:0,
+      levels: [
+        {title:'חיבור וחיסור עד 100', types:['addsub100']},
+        {title:'מבנה עשרוני וערך המקום', types:['place_value','addsub100']},
+        {title:'חיבור וחיסור עד 1000', types:['addsub1000']},
+        {title:'מבוא לכפל', types:['mul_easy']},
+        {title:'בעיות מילוליות', types:['word2','mul_easy']},
+        {title:'חצי, רבע ושליש', types:['frac_part']},
+        {title:'כסף — שקלים', types:['money','word2']},
+        {title:'מה השעה?', types:['clock']},
+        {title:'הכול ביחד! 💪', types:['addsub1000','place_value','mul_easy','word2','frac_part','money','clock']}
+      ]
+    },
+    g3: {
+      label:'כיתה ג׳', short:'ג', input:'numpad', trackVersion:1, startLevel:0,
       levels: [
         {title:'חימום: כפל וחילוק', types:['mul_easy','mul_mid','mul_hard','div']},
         {title:'כפל וחילוק עם נעלם', types:['mul_missing','div']},
@@ -136,35 +206,51 @@ const CONFIG = {
         {title:'מבחן מסכם 🏆', types:['mul_hard','div','mul_missing','place_value','mental_big','addsub_4digit','order_ops','rounding','sequence','word3','geo_angles','geo_shapes']}
       ]
     },
-    raz: {
-      name:'רז', emoji:'🦋', color:'#ec4899', grade:'כיתה א׳', input:'numpad',
-      trackVersion: 2, startLevel: 2,   // מתחילה ישר מ"חיבור וחיסור עד 20"
+    g4: {
+      label:'כיתה ד׳', short:'ד', input:'numpad', trackVersion:1, startLevel:0,
       levels: [
-        {title:'חיבור עד 10', types:['add10']},
-        {title:'חיסור עד 10', types:['sub10','add10']},
-        {title:'חיבור וחיסור עד 20', types:['addsub20']},
-        {title:'השלמת תרגיל', types:['complete','addsub20']},
-        {title:'בעיות מילוליות', types:['word','complete']},
-        {title:'עשרות שלמות עד 100', types:['addsub_tens','addsub20']},
-        {title:'חיבור וחיסור עד 100', types:['addsub100','addsub_tens']},
-        {title:'הכול ביחד! 💪', types:['add10','sub10','addsub20','complete','word','addsub_tens','addsub100']}
+        {title:'כפל אנכי', types:['mul_multi']},
+        {title:'חילוק ארוך', types:['long_div','mul_multi']},
+        {title:'מספרים גדולים', types:['place_big','addsub_4digit']},
+        {title:'שברים — חלק מהשלם', types:['frac_part','frac_compare']},
+        {title:'השוואת שברים', types:['frac_compare']},
+        {title:'חיבור וחיסור שברים', types:['frac_same']},
+        {title:'היקף ושטח', types:['area_perim']},
+        {title:'זוויות', types:['geo_angles','area_perim']},
+        {title:'מבחן מסכם 🏆', types:['mul_multi','long_div','place_big','frac_compare','frac_same','area_perim','geo_angles']}
       ]
     },
-    tzuri: {
-      name:'צורי', emoji:'🐥', color:'#0ea5a4', grade:'גן חובה', input:'choice',
-      trackVersion: 1, startLevel: 0,
+    g5: {
+      label:'כיתה ה׳', short:'ה', input:'numpad', trackVersion:1, startLevel:0,
       levels: [
-        {title:'ספירה עד 5', types:['count5']},
-        {title:'זיהוי ספרות', types:['digits','count5']},
-        {title:'ספירה עד 10', types:['count10','digits']},
-        {title:'מה גדול יותר?', types:['compare','count10']},
-        {title:'חיבור עד 5', types:['tadd5','compare']},
-        {title:'חיבור עד 10', types:['tadd10','tadd5']},
-        {title:'הכול ביחד! 💪', types:['count10','digits','compare','tadd5','tadd10']}
+        {title:'צמצום שברים', types:['frac_simplify']},
+        {title:'שבר מתוך כמות', types:['frac_of','frac_simplify']},
+        {title:'חיבור וחיסור שברים', types:['frac_same','frac_simplify']},
+        {title:'שברים עשרוניים', types:['decimal_addsub']},
+        {title:'אחוזים', types:['percent_simple']},
+        {title:'שטח משולש ומלבן', types:['area_triangle','area_perim']},
+        {title:'ממוצע', types:['average']},
+        {title:'מבחן מסכם 🏆', types:['frac_simplify','frac_of','frac_same','decimal_addsub','percent_simple','area_triangle','average']}
+      ]
+    },
+    g6: {
+      label:'כיתה ו׳', short:'ו', input:'numpad', trackVersion:1, startLevel:0,
+      levels: [
+        {title:'יחס ופרופורציה', types:['ratio']},
+        {title:'אחוזים', types:['percent_of']},
+        {title:'הנחות ומחירים', types:['discount','percent_of']},
+        {title:'שברים — כל הפעולות', types:['frac_same','frac_simplify']},
+        {title:'שברים עשרוניים', types:['decimal_addsub']},
+        {title:'מבוא לאלגברה', types:['algebra']},
+        {title:'נפח תיבה', types:['volume_box']},
+        {title:'מבחן מסכם 🏆', types:['ratio','percent_of','discount','frac_simplify','decimal_addsub','algebra','volume_box']}
       ]
     }
   }
 };
+
+// סדר הצגת הכיתות בהרשמה (מסננים לפי מה שקיים ב-CONFIG.grades, כדי שכיתות יתווספו בהדרגה)
+const GRADE_ORDER = ['gan','g1','g2','g3','g4','g5','g6'];
 
 const TYPE_NAMES = {
   mul_easy:'כפל 2, 5, 10', mul_mid:'כפל 3, 4, 6', mul_hard:'כפל 7, 8, 9', div:'חילוק',
@@ -173,6 +259,13 @@ const TYPE_NAMES = {
   addsub_4digit:'חיבור וחיסור עד 10,000', order_ops:'סדר פעולות', rounding:'עיגול מספרים',
   sequence:'סדרות', word3:'בעיות מילוליות', geo_angles:'זיהוי זוויות', geo_shapes:'זיהוי צורות',
   addsub_tens:'עשרות שלמות עד 100',
+  word2:'בעיות מילוליות', frac_part:'חצי, רבע ושליש', money:'כסף — שקלים', clock:'קריאת שעון',
+  mul_multi:'כפל אנכי', long_div:'חילוק ארוך', place_big:'מספרים גדולים',
+  frac_compare:'השוואת שברים', frac_same:'חיבור וחיסור שברים', area_perim:'היקף ושטח',
+  frac_simplify:'צמצום שברים', frac_of:'שבר מתוך כמות', percent_simple:'אחוזים',
+  decimal_addsub:'שברים עשרוניים', area_triangle:'שטח משולש', average:'ממוצע',
+  ratio:'יחס ופרופורציה', percent_of:'אחוז מתוך כמות', discount:'הנחות ומחירים',
+  algebra:'מבוא לאלגברה', volume_box:'נפח תיבה',
   add10:'חיבור עד 10', sub10:'חיסור עד 10', addsub20:'חיבור וחיסור עד 20',
   complete:'השלמת תרגיל', word:'בעיות מילוליות',
   count5:'ספירה עד 5', count10:'ספירה עד 10', digits:'זיהוי ספרות',
@@ -247,7 +340,7 @@ function bigAddSubHint(a, b, op) {
 
 // פירוק מספר לספרות עם שם המקום של כל ספרה, להדגשת ספרה מבוקשת
 function digitsHint(n, placeIdx) {
-  const s = String(n), names = ['אֲחָדוֹת', 'עֲשָׂרוֹת', 'מֵאוֹת', 'אֲלָפִים'];
+  const s = String(n), names = ['אֲחָדוֹת', 'עֲשָׂרוֹת', 'מֵאוֹת', 'אֲלָפִים', 'עֲשֶׂרֶת אֲלָפִים', 'מֵאוֹת אֲלָפִים'];
   let cells = '';
   for (let i = 0; i < s.length; i++) {
     const p = s.length - 1 - i, hot = p === placeIdx;
@@ -307,6 +400,54 @@ function mulHint(a, b) {
   for (let i = 0; i < Math.min(b, 10); i++) sum.push(a);
   return '<span dir="ltr">' + a + ' × ' + b + '</span> זֶה ' + b + ' פְּעָמִים ' + a +
     ': <span dir="ltr">' + sum.join(' + ') + '</span><br>' + dotGrid(a, b);
+}
+
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { const t = b; b = a % b; a = t; } return a || 1; }
+
+// משולש ישר-זווית עם תוויות בסיס וגובה (לשטח משולש)
+function triSVG(base, height) {
+  const scale = 100 / Math.max(base, height, 1);
+  const W = base * scale, H = height * scale, ox = 40, oy = 12;
+  const pts = ox + ',' + (oy + H) + ' ' + (ox + W) + ',' + (oy + H) + ' ' + ox + ',' + oy;
+  return '<svg width="' + (W + 60) + '" height="' + (H + 38) + '" viewBox="0 0 ' + (W + 60) + ' ' + (H + 38) + '">' +
+    '<polygon points="' + pts + '" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/>' +
+    '<text x="' + (ox + W / 2).toFixed(1) + '" y="' + (oy + H + 18) + '" text-anchor="middle" font-size="15" fill="#4c1d95" font-weight="700">' + base + '</text>' +
+    '<text x="' + (ox - 10) + '" y="' + (oy + H / 2).toFixed(1) + '" text-anchor="end" font-size="15" fill="#4c1d95" font-weight="700">' + height + '</text></svg>';
+}
+
+// מלבן עם תוויות אורך ורוחב (להיקף ושטח)
+function rectSVG(w, h) {
+  const scale = 120 / Math.max(w, h, 1);
+  const W = w * scale, H = h * scale, ox = 14, oy = 22;
+  return '<svg width="' + (W + 70) + '" height="' + (H + 50) + '" viewBox="0 0 ' + (W + 70) + ' ' + (H + 50) + '">' +
+    '<rect x="' + ox + '" y="' + oy + '" width="' + W.toFixed(1) + '" height="' + H.toFixed(1) +
+    '" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/>' +
+    '<text x="' + (ox + W / 2).toFixed(1) + '" y="' + (oy - 6) + '" text-anchor="middle" font-size="15" fill="#4c1d95" font-weight="700">' + w + '</text>' +
+    '<text x="' + (ox + W + 8).toFixed(1) + '" y="' + (oy + H / 2).toFixed(1) + '" font-size="15" fill="#4c1d95" font-weight="700">' + h + '</text></svg>';
+}
+
+// תצוגת שבר פשוט בכיוון שמאל-לימין (מונה/מכנה)
+function fracDisp(num, den) { return '<span dir="ltr">' + num + '/' + den + '</span>'; }
+
+// שעון אנלוגי: פנים, 12 סימוני שעות, מחוג שעות קצר ומחוג דקות ארוך
+function clockSVG(h, min) {
+  const cx = 70, cy = 70, r = 58;
+  let ticks = '';
+  for (let i = 0; i < 12; i++) {
+    const ang = i * 30 * Math.PI / 180;
+    const x1 = cx + (r - 8) * Math.sin(ang), y1 = cy - (r - 8) * Math.cos(ang);
+    const x2 = cx + r * Math.sin(ang), y2 = cy - r * Math.cos(ang);
+    ticks += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#7c3aed" stroke-width="3"/>';
+  }
+  const minAng = min * 6 * Math.PI / 180;
+  const hourAng = ((h % 12) * 30 + min * 0.5) * Math.PI / 180;
+  const hx = cx + r * 0.5 * Math.sin(hourAng), hy = cy - r * 0.5 * Math.cos(hourAng);
+  const mx = cx + r * 0.78 * Math.sin(minAng), my = cy - r * 0.78 * Math.cos(minAng);
+  return '<svg width="140" height="140" viewBox="0 0 140 140">' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="#fff" stroke="#7c3aed" stroke-width="4"/>' + ticks +
+    '<line x1="' + cx + '" y1="' + cy + '" x2="' + hx.toFixed(1) + '" y2="' + hy.toFixed(1) + '" stroke="#3b2d52" stroke-width="6" stroke-linecap="round"/>' +
+    '<line x1="' + cx + '" y1="' + cy + '" x2="' + mx.toFixed(1) + '" y2="' + my.toFixed(1) + '" stroke="#a855f7" stroke-width="4" stroke-linecap="round"/>' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="#3b2d52"/></svg>';
 }
 
 // יצירת תרגיל לפי סוג. easy=true בזמן חיזוק (גרסה קלה יותר)
@@ -505,6 +646,285 @@ function genExercise(type, easy) {
         hint: SHAPE_HINTS[target] };
     }
 
+    /* ---------- כיתה ב ---------- */
+    case 'word2': {
+      const v = ri(0, 2);
+      if (v === 0) {
+        a = ri(10, easy ? 30 : 60); b = ri(5, easy ? 20 : 39);
+        return { type, mode:'numpad',
+          prompt:'בְּגַן הַחַיּוֹת רָאִינוּ ' + a + ' צִיפּוֹרִים 🐦 וְעוֹד ' + b + ' פַּרְפַּרִים 🦋. כַּמָּה בַּעֲלֵי כְּנָפַיִם בְּסַךְ הַכֹּל?',
+          line:'?', answer: a + b,
+          hint:'מְחַבְּרִים אֶת הַשְּׁנַיִם: <span dir="ltr"><b>' + a + ' + ' + b + ' = ?</b></span>' };
+      }
+      if (v === 1) {
+        a = ri(20, easy ? 40 : 99); b = ri(5, a - 3);
+        return { type, mode:'numpad',
+          prompt:'בַּמַּדָּף הָיוּ ' + a + ' סְפָרִים 📚 וְהִשְׁאַלְנוּ ' + b + '. כַּמָּה סְפָרִים נִשְׁאֲרוּ?',
+          line:'?', answer: a - b,
+          hint:'מְחַסְּרִים אֶת מָה שֶׁהָלַךְ: <span dir="ltr"><b>' + a + ' − ' + b + ' = ?</b></span>' };
+      }
+      a = pick([2, 5, 10]); b = ri(2, easy ? 5 : 9);
+      return { type, mode:'numpad',
+        prompt:'בְּכָל צַלַּחַת ' + a + ' עוּגִיּוֹת 🍪, וְיֵשׁ ' + b + ' צַלָּחוֹת. כַּמָּה עוּגִיּוֹת בְּסַךְ הַכֹּל?',
+        line:'?', answer: a * b,
+        hint:'זֶה כֶּפֶל: <span dir="ltr"><b>' + a + ' × ' + b + ' = ?</b></span>' };
+    }
+    case 'money': {
+      if (Math.random() < 0.5) {
+        a = ri(5, easy ? 20 : 60); b = ri(5, easy ? 20 : 39);
+        return { type, mode:'numpad',
+          prompt:'קָנִיתָ מַחְבֶּרֶת בְּ-' + a + ' ש״ח 📓 וְעִפָּרוֹן בְּ-' + b + ' ש״ח ✏️. כַּמָּה שִׁילַּמְתָּ בְּסַךְ הַכֹּל?',
+          line:'?', answer: a + b,
+          hint:'מְחַבְּרִים אֶת הַמְּחִירִים: <span dir="ltr"><b>' + a + ' + ' + b + ' = ?</b></span>' };
+      }
+      const pay = pick([20, 50, 100]); const cost = ri(5, pay - 2);
+      return { type, mode:'numpad',
+        prompt:'שִׁילַּמְתָּ ' + pay + ' ש״ח 💵 עַל מִשְׂחָק שֶׁעוֹלֶה ' + cost + ' ש״ח. כַּמָּה עוֹדֶף תְּקַבֵּל?',
+        line:'?', answer: pay - cost,
+        hint:'הָעוֹדֶף הוּא הַהֶפְרֵשׁ: <span dir="ltr"><b>' + pay + ' − ' + cost + ' = ?</b></span>' };
+    }
+    case 'frac_part': {
+      const parts = pick([2, 3, 4]);
+      const names = { 2:'חצי', 3:'שליש', 4:'רבע' };
+      const nik = { 2:'חֵצִי', 3:'שְׁלִישׁ', 4:'רֶבַע' };
+      const W = 168, H = 90, cw = W / parts;
+      let cells = '';
+      for (let i = 0; i < parts; i++)
+        cells += '<rect x="' + (i * cw).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + H +
+          '" fill="' + (i === 0 ? '#a855f7' : '#ede9fe') + '" stroke="#7c3aed" stroke-width="3"/>';
+      const vis = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' + cells + '</svg>';
+      return { type, mode:'choice', prompt:'אֵיזֶה חֵלֶק מֵהַצּוּרָה צָבוּעַ?', visual: vis,
+        answer: names[parts],
+        options: shuffle([2, 3, 4].map(p => ({ label: nik[p], value: names[p] }))),
+        hint:'הַצּוּרָה מְחוּלֶּקֶת לְ-' + parts + ' חֲלָקִים שָׁוִים, וְצָבוּעַ חֵלֶק אֶחָד מִתּוֹכָם.' };
+    }
+    case 'clock': {
+      const h = ri(1, 12);
+      const min = (!easy && Math.random() < 0.5) ? 30 : 0;
+      const fmtT = (hh, mm) => hh + ':' + (mm === 0 ? '00' : '30');
+      const ans = fmtT(h, min);
+      const opts = new Set([ans]);
+      let guard = 0;
+      while (opts.size < 3 && guard++ < 200) {
+        const dh = ri(1, 12), dm = (!easy && Math.random() < 0.5) ? 30 : 0;
+        opts.add(fmtT(dh, dm));
+      }
+      return { type, mode:'choice', prompt:'מָה הַשָּׁעָה?', visual: clockSVG(h, min),
+        answer: ans,
+        options: shuffle([...opts].map(t => ({ label: t, value: t }))),
+        hint:'הַמָּחוֹג הַקָּצָר מַרְאֶה אֶת הַשָּׁעָה, וְהַמָּחוֹג הָאָרוֹךְ אֶת הַדַּקּוֹת (לְמַעְלָה = 00, לְמַטָּה = 30).' };
+    }
+
+    /* ---------- כיתה ד ---------- */
+    case 'mul_multi': {
+      const digits = easy ? 2 : pick([2, 3]);
+      a = ri(Math.pow(10, digits - 1) + 1, Math.pow(10, digits) - 1);
+      b = ri(2, easy ? 5 : 9);
+      const s = String(a), parts = [];
+      for (let i = 0; i < s.length; i++) {
+        const val = Number(s[i]) * Math.pow(10, s.length - 1 - i);
+        if (val > 0) parts.push(val + ' × ' + b + ' = ' + (val * b));
+      }
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' × ' + b + ' = ?',
+        answer: a * b,
+        hint:'מְפָרְקִים לְפִי עֵרֶךְ הַמָּקוֹם וּמְחַבְּרִים:<br><span dir="ltr"><b>' + parts.join('<br>') + '</b></span>' };
+    }
+    case 'long_div': {
+      const divisor = ri(2, easy ? 5 : 9);
+      const q = easy ? ri(2, 20) : ri(11, 99);
+      a = divisor * q;
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה?', line: a + ' ÷ ' + divisor + ' = ?',
+        answer: q,
+        hint:'כַּמָּה פְּעָמִים ' + divisor + ' נִכְנָס בְּ-' + fmt(a) + '? נַסִּי בִּקְפִיצוֹת שֶׁל ' + divisor + ' × 10 = ' + (divisor * 10) + ' 🙂' };
+    }
+    case 'place_big': {
+      const len = easy ? 5 : 6;
+      n = ri(Math.pow(10, len - 1), Math.pow(10, len) - 1);
+      const names = ['הָאֲחָדוֹת', 'הָעֲשָׂרוֹת', 'הַמֵּאוֹת', 'הָאֲלָפִים', 'עֲשֶׂרֶת הָאֲלָפִים', 'מֵאוֹת הָאֲלָפִים'];
+      const place = ri(0, len - 1);
+      return { type, mode:'numpad', prompt:'מַהִי סִפְרַת ' + names[place] + ' בַּמִּסְפָּר ' + fmt(n) + '?',
+        line:'?', answer: Math.floor(n / Math.pow(10, place)) % 10,
+        meta:{ n, place }, hint: digitsHint(n, place) };
+    }
+    case 'frac_compare': {
+      let f1, f2, v1, v2;
+      if (Math.random() < 0.5) {
+        const den = pick([3, 4, 5, 6, 8]);
+        let a1 = ri(1, den - 1), a2;
+        do { a2 = ri(1, den - 1); } while (a2 === a1);
+        f1 = a1 + '/' + den; f2 = a2 + '/' + den; v1 = a1 / den; v2 = a2 / den;
+      } else {
+        let d1 = pick([2, 3, 4, 5, 6, 8]), d2;
+        do { d2 = pick([2, 3, 4, 5, 6, 8]); } while (d2 === d1);
+        f1 = '1/' + d1; f2 = '1/' + d2; v1 = 1 / d1; v2 = 1 / d2;
+      }
+      const bigger = v1 > v2 ? f1 : f2;
+      return { type, mode:'choice', prompt:'אֵיזֶה שֶׁבֶר גָּדוֹל יוֹתֵר?',
+        answer: bigger,
+        options: shuffle([f1, f2].map(f => ({ html:'<span dir="ltr">' + f + '</span>', value: f }))),
+        hint:'כְּשֶׁהַמְּכַנֶּה שָׁוֶה — הַמּוֹנֶה הַגָּדוֹל מְנַצֵּחַ. כְּשֶׁהַמּוֹנֶה 1 — דַּוְקָא הַמְּכַנֶּה הַקָּטָן נוֹתֵן שֶׁבֶר גָּדוֹל יוֹתֵר 🙂' };
+    }
+    case 'frac_same': {
+      const den = pick([3, 4, 5, 6, 8, 10]);
+      const add = Math.random() < 0.5;
+      let n1, n2, res;
+      if (add) { n1 = ri(1, den - 2); n2 = ri(1, den - 1 - n1); res = n1 + n2; }
+      else { n1 = ri(2, den - 1); n2 = ri(1, n1 - 1); res = n1 - n2; }
+      const ans = res + '/' + den;
+      const opts = new Set([ans]);
+      let guard = 0;
+      while (opts.size < 3 && guard++ < 200) {
+        const r = ri(0, den);
+        if (r !== res) opts.add(r + '/' + den);
+      }
+      return { type, mode:'choice', prompt:'כַּמָּה זֶה?',
+        visual:'<div class="frac-expr" dir="ltr">' + n1 + '/' + den + (add ? ' + ' : ' − ') + n2 + '/' + den + '</div>',
+        answer: ans,
+        options: shuffle([...opts].map(f => ({ html:'<span dir="ltr">' + f + '</span>', value: f }))),
+        hint:'כְּשֶׁהַמְּכַנֶּה שָׁוֶה, ' + (add ? 'מְחַבְּרִים' : 'מְחַסְּרִים') + ' רַק אֶת הַמּוֹנֶה (לְמַעְלָה). הַמְּכַנֶּה נִשְׁאָר ' + den + '.' };
+    }
+    case 'area_perim': {
+      const w = ri(2, easy ? 6 : 12), h = ri(2, easy ? 6 : 12);
+      const vis = rectSVG(w, h);
+      if (Math.random() < 0.5)
+        return { type, mode:'numpad', prompt:'מַהוּ הַשֶּׁטַח שֶׁל הַמַּלְבֵּן? (בְּרִיבּוּעִים)', visual: vis,
+          line:'?', answer: w * h, meta:{ w, h, kind:'area' },
+          hint:'שֶׁטַח מַלְבֵּן = אֹרֶךְ × רֹחַב: <span dir="ltr"><b>' + w + ' × ' + h + ' = ?</b></span>' };
+      return { type, mode:'numpad', prompt:'מַהוּ הַהֶיקֵּף שֶׁל הַמַּלְבֵּן?', visual: vis,
+        line:'?', answer: 2 * (w + h), meta:{ w, h, kind:'perim' },
+        hint:'הֶיקֵּף = סְכוּם כָּל הַצְּלָעוֹת: <span dir="ltr"><b>' + w + ' + ' + h + ' + ' + w + ' + ' + h + ' = ?</b></span>' };
+    }
+
+    /* ---------- כיתה ה ---------- */
+    case 'frac_simplify': {
+      let sden = pick([2, 3, 4, 5, 6]), snum;
+      do { snum = ri(1, sden - 1); } while (gcd(snum, sden) !== 1);
+      const k = ri(2, 4);
+      const num = snum * k, den = sden * k;
+      const ans = snum + '/' + sden;
+      const opts = new Set([ans]);
+      let guard = 0;
+      while (opts.size < 3 && guard++ < 200) {
+        const ds = pick([2, 3, 4, 5, 6]), ns = ri(1, ds - 1);
+        const cand = ns + '/' + ds;
+        if (cand !== ans && ns / ds !== snum / sden) opts.add(cand);
+      }
+      return { type, mode:'choice', prompt:'מַהוּ הַשֶּׁבֶר הַמְצֻמְצָם?',
+        visual:'<div class="frac-expr" dir="ltr">' + num + '/' + den + '</div>',
+        answer: ans,
+        options: shuffle([...opts].map(f => ({ html:'<span dir="ltr">' + f + '</span>', value: f }))),
+        hint:'מְחַלְּקִים גַּם אֶת הַמּוֹנֶה וְגַם אֶת הַמְּכַנֶּה בְּאוֹתוֹ מִסְפָּר. כָּאן אֶפְשָׁר לְחַלֵּק בְּ-' + k + '.' };
+    }
+    case 'frac_of': {
+      const den = pick([2, 3, 4, 5]); const num = ri(1, den - 1);
+      const whole = den * ri(2, easy ? 6 : 12);
+      return { type, mode:'numpad',
+        prompt:'כַּמָּה זֶה ' + num + '/' + den + ' מִתּוֹךְ ' + whole + '?',
+        line:'?', answer: whole / den * num,
+        hint:'קֹדֶם מְחַלְּקִים לְ-' + den + ' חֲלָקִים: <span dir="ltr"><b>' + whole + ' ÷ ' + den + ' = ' + (whole / den) + '</b></span>, וְאָז כּוֹפְלִים בְּ-' + num + '.' };
+    }
+    case 'decimal_addsub': {
+      const add = Math.random() < 0.5;
+      let t1, t2, r;
+      if (add) { t1 = ri(1, 8); t2 = ri(1, 9 - t1); r = t1 + t2; }
+      else { t1 = ri(2, 9); t2 = ri(1, t1 - 1); r = t1 - t2; }
+      const f = t => (t / 10).toFixed(1);
+      const ans = f(r);
+      const opts = new Set([ans]);
+      let guard = 0;
+      while (opts.size < 3 && guard++ < 60) { const d = ri(0, 9); if (f(d) !== ans) opts.add(f(d)); }
+      return { type, mode:'choice', prompt:'כַּמָּה זֶה?',
+        visual:'<div class="frac-expr" dir="ltr">' + f(t1) + (add ? ' + ' : ' − ') + f(t2) + '</div>',
+        answer: ans,
+        options: shuffle([...opts].map(v => ({ label: v, value: v }))),
+        hint:'מְחַבְּרִים אוֹ מְחַסְּרִים עֲשִׂירִיּוֹת כְּמוֹ מִסְפָּרִים רְגִילִים, וְשׁוֹמְרִים עַל הַנְּקֻדָּה בַּמָּקוֹם.' };
+    }
+    case 'percent_simple': {
+      const pct = pick([10, 25, 50, 100]);
+      const mult = pct === 10 ? 10 : pct === 25 ? 4 : pct === 50 ? 2 : 1;
+      const amount = mult * ri(2, easy ? 8 : 20);
+      const hint = pct === 50 ? 'חֲצִי מִ-' + amount + ' 🙂'
+        : pct === 25 ? 'רֶבַע מִ-' + amount + ' (מְחַלְּקִים בְּ-4)'
+        : pct === 10 ? 'עֲשִׂירִית מִ-' + amount + ' (מְחַלְּקִים בְּ-10)'
+        : 'מֵאָה אָחוּז זֶה הַכֹּל — ' + amount + '!';
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה ' + pct + '% מִתּוֹךְ ' + amount + '?',
+        line:'?', answer: amount * pct / 100, hint };
+    }
+    case 'area_triangle': {
+      const base = ri(2, easy ? 6 : 12);
+      let height = ri(2, easy ? 6 : 12);
+      if ((base * height) % 2 !== 0) height += (height < 12 ? 1 : -1);
+      return { type, mode:'numpad', prompt:'מַהוּ שֶׁטַח הַמְּשׁוּלָּשׁ?', visual: triSVG(base, height),
+        line:'?', answer: base * height / 2, meta:{ base, height },
+        hint:'שֶׁטַח מְשׁוּלָּשׁ = (בָּסִיס × גֹּבַהּ) ÷ 2: <span dir="ltr"><b>(' + base + ' × ' + height + ') ÷ 2 = ?</b></span>' };
+    }
+    case 'average': {
+      const k = easy ? 2 : pick([2, 3]);
+      const avg = ri(easy ? 5 : 10, easy ? 20 : 60);
+      const d = ri(0, Math.min(avg - 1, k === 2 ? 9 : 6));
+      const nums = k === 2 ? [avg - d, avg + d] : [avg - d, avg, avg + d];
+      return { type, mode:'numpad',
+        prompt:'מַהוּ הַמְּמֻצָּע שֶׁל הַמִּסְפָּרִים: ' + nums.join(', ') + '?',
+        line:'?', answer: avg, meta:{ nums },
+        hint:'מְחַבְּרִים אֶת כֻּלָּם וּמְחַלְּקִים בְּכַמּוּת: <span dir="ltr"><b>(' + nums.join(' + ') + ') ÷ ' + k + ' = ?</b></span>' };
+    }
+
+    /* ---------- כיתה ו ---------- */
+    case 'ratio': {
+      let r1 = ri(1, 5), r2;
+      do { r2 = ri(1, 6); } while (r2 === r1);
+      const k = ri(2, easy ? 5 : 9);
+      return { type, mode:'numpad',
+        prompt:'הַיַּחַס בֵּין כַּדּוּרִים אֲדֻמִּים לִכְחֻלִּים הוּא ' + r1 + ':' + r2 + '. אִם יֵשׁ ' + (r1 * k) + ' אֲדֻמִּים, כַּמָּה כְּחֻלִּים?',
+        line:'?', answer: r2 * k,
+        hint:'כָּל חֵלֶק בַּיַּחַס שָׁוֶה <span dir="ltr"><b>' + (r1 * k) + ' ÷ ' + r1 + ' = ' + k + '</b></span>. לַכְּחֻלִּים יֵשׁ ' + r2 + ' חֲלָקִים.' };
+    }
+    case 'percent_of': {
+      const pct = pick([5, 15, 20, 30, 40, 60, 75]);
+      const step = 100 / gcd(pct, 100);
+      const amount = step * ri(2, easy ? 6 : 15);
+      return { type, mode:'numpad', prompt:'כַּמָּה זֶה ' + pct + '% מִתּוֹךְ ' + amount + '?',
+        line:'?', answer: amount * pct / 100,
+        hint:'אֶפְשָׁר לִמְצֹא 10% (' + amount + ' ÷ 10) וּלְשַׁעֵר, אוֹ לְחַשֵּׁב <span dir="ltr"><b>' + amount + ' × ' + pct + ' ÷ 100</b></span>.' };
+    }
+    case 'discount': {
+      const pct = pick([10, 20, 25, 50]);
+      const mult = pct === 10 ? 10 : pct === 20 ? 5 : pct === 25 ? 4 : 2;
+      const price = mult * ri(4, easy ? 10 : 30);
+      const off = price * pct / 100;
+      return { type, mode:'numpad',
+        prompt:'מְחִיר חֻלְצָה ' + price + ' ש״ח 👕, וְיֵשׁ הֲנָחָה שֶׁל ' + pct + '%. כַּמָּה תְּשַׁלֵּם?',
+        line:'?', answer: price - off,
+        hint:'הַהֲנָחָה הִיא ' + pct + '% מִ-' + price + ' = ' + off + ' ש״ח. מַפְחִיתִים מֵהַמְּחִיר.' };
+    }
+    case 'algebra': {
+      const v = ri(0, 2);
+      const x = ri(2, easy ? 10 : 20);
+      if (v === 0) {
+        const b = ri(1, easy ? 10 : 30);
+        return { type, mode:'numpad', prompt:'מָצְאִי אֶת הַנֶּעְלָם x',
+          visual:'<div class="frac-expr" dir="ltr">x + ' + b + ' = ' + (x + b) + '</div>', line:'?', answer: x,
+          hint:'מַעֲבִירִים אֶת ' + b + ' לַצַּד הַשֵּׁנִי: <span dir="ltr"><b>' + (x + b) + ' − ' + b + ' = ?</b></span>' };
+      }
+      if (v === 1) {
+        const b = ri(1, x - 1);
+        return { type, mode:'numpad', prompt:'מָצְאִי אֶת הַנֶּעְלָם x',
+          visual:'<div class="frac-expr" dir="ltr">x − ' + b + ' = ' + (x - b) + '</div>', line:'?', answer: x,
+          hint:'<span dir="ltr"><b>' + (x - b) + ' + ' + b + ' = ?</b></span>' };
+      }
+      const m = pick([2, 3, 4, 5]);
+      return { type, mode:'numpad', prompt:'מָצְאִי אֶת הַנֶּעְלָם x',
+        visual:'<div class="frac-expr" dir="ltr">' + m + ' × x = ' + (m * x) + '</div>', line:'?', answer: x,
+        hint:'מְחַלְּקִים אֶת שְׁנֵי הַצְּדָדִים בְּ-' + m + ': <span dir="ltr"><b>' + (m * x) + ' ÷ ' + m + ' = ?</b></span>' };
+    }
+    case 'volume_box': {
+      const l = ri(2, easy ? 5 : 8), w = ri(2, easy ? 5 : 8), hh = ri(2, easy ? 4 : 6);
+      return { type, mode:'numpad',
+        prompt:'מַהוּ הַנֶּפַח שֶׁל תֵּבָה בְּמִדּוֹת ' + l + ' × ' + w + ' × ' + hh + '? (בְּקֻבִּיּוֹת)',
+        line:'?', answer: l * w * hh,
+        hint:'נֶפַח תֵּבָה = אֹרֶךְ × רֹחַב × גֹּבַהּ: <span dir="ltr"><b>' + l + ' × ' + w + ' × ' + hh + ' = ?</b></span>' };
+    }
+
     /* ---------- רז ---------- */
     case 'addsub_tens': {
       const lim = easy ? 5 : 10; // עשרות
@@ -673,6 +1093,16 @@ function chooseType(profile, st) {
   return { type: pick(lvl.types), easy: false };
 }
 
+// מבחן מיקום → אינדקס רמת פתיחה. פרופורציוני למספר הנכונות, וחסום כך שלא
+// מתחילים על רמת "המבחן המסכם" האחרונה (תמיד נשארת רמה אחת לטיפוס).
+function placementStartLevel(correct, total, levelsCount) {
+  if (levelsCount <= 1) return 0;
+  const maxStart = levelsCount - 2;
+  if (maxStart <= 0) return 0;
+  const frac = total > 0 ? correct / total : 0;
+  return Math.max(0, Math.min(maxStart, Math.round(frac * maxStart)));
+}
+
 /* ==LOGIC-END== */
 
 /* ============================================================
@@ -682,38 +1112,40 @@ function chooseType(profile, st) {
 // עולם הרפתקה לכל פרופיל: רקע, דמות מלווה, אייקוני מפת מסע ומחמאות בטעם העולם.
 // הצבעים עצמם מוגדרים ב-style.css תחת body[data-theme="..."].
 const THEMES = {
-  noa: {
-    key:'space', world:'מסע בין כוכבים', worldEmoji:'🌌',
+  space: {
+    world:'מסע בין כוכבים', worldEmoji:'🌌', color:'#8b5cf6',
     bg:'assets/noa-bg.jpg',
     mascot:{ happy:'assets/noa-mascot-happy.png', cheer:'assets/noa-mascot-cheer.png' },
     nodeIcons:{ done:'🪐', current:'🚀', locked:'🔒', final:'🏆' },
     praise:['מעולה, אסטרונאוטית! 🚀','טסת על זה! 🌟','חישוב בין-כוכבי מושלם! 🪐','אלופת החלל! 👩‍🚀']
   },
-  raz: {
-    key:'forest', world:'יער הקסמים', worldEmoji:'🧚',
+  forest: {
+    world:'יער הקסמים', worldEmoji:'🧚', color:'#ec4899',
     bg:'assets/raz-bg.jpg',
     mascot:{ happy:'assets/raz-mascot-happy.png', cheer:'assets/raz-mascot-cheer.png' },
     nodeIcons:{ done:'🌸', current:'🦋', locked:'🔒', final:'🏆' },
     praise:['קסם אמיתי! ✨','הפיות מריעות לך! 🧚','איזה יופי! 🦋','כישרון קסום! 🌟']
   },
-  tzuri: {
-    key:'farm', world:'חוות החיות', worldEmoji:'🚜',
+  farm: {
+    world:'חוות החיות', worldEmoji:'🚜', color:'#0ea5a4',
     bg:'assets/tzuri-bg.jpg',
     mascot:{ happy:'assets/tzuri-mascot-happy.png', cheer:'assets/tzuri-mascot-cheer.png' },
     nodeIcons:{ done:'🌻', current:'🐥', locked:'🔒', final:'🏆' },
     praise:['כל החיות שמחות! 🐮','אלופת החווה! 🐥','נכון מאוד! 🐔','יש! קוקוריקו! 🐓']
   }
 };
+const THEME_KEYS = ['space','forest','farm'];
+const AVATAR_EMOJIS = ['🦊','🐰','🐱','🐶','🐼','🦁','🐯','🐨','🦄','🐧','🐢','🦋','🐝','🐙','🦉','🐥','🦒','🐬'];
 
-function applyTheme(id) {
-  const t = THEMES[id];
+function applyTheme(themeKey) {
+  const t = THEMES[themeKey];
   if (t) {
-    document.body.dataset.theme = t.key;
+    document.body.dataset.theme = themeKey;
   } else {
     delete document.body.dataset.theme;
   }
   // fallback inline למקרה ש-style.css לא נטען; זהה לצבע שהערכה מגדירה
-  document.body.style.setProperty('--accent', CONFIG.profiles[id] ? CONFIG.profiles[id].color : '');
+  document.body.style.setProperty('--accent', t ? t.color : '');
   const m = document.getElementById('mascot');
   if (m && t) {
     m.style.display = '';
@@ -726,7 +1158,7 @@ function applyTheme(id) {
 // פוזה ותגובת אנימציה של הדמות המלווה
 function setMascot(pose) {
   const m = document.getElementById('mascot');
-  const t = THEMES[curId];
+  const t = curProfile && THEMES[curProfile.themeKey];
   if (!m || !t || m.style.display === 'none') return;
   m.src = pose === 'cheer' ? t.mascot.cheer : t.mascot.happy;
   m.classList.remove('cheer', 'nudge');
@@ -740,32 +1172,53 @@ function clearTheme() {
 }
 
 const $ = id => document.getElementById(id);
-let curId = null, st = null, ex = null, attempts = 0, typed = '', locked = false;
+let curId = null, curProfile = null, st = null, ex = null, attempts = 0, typed = '', locked = false;
 
-function storageKey(id) { return 'math_app_' + id; }
+/* ---------- מודל ילדים רשומים ---------- */
+// רשימת הילדים נשמרת תחת מפתח אחד; מצב ההתקדמות של כל ילד תחת מפתח לפי ה-id שלו.
+function loadUsers() {
+  try { return JSON.parse(localStorage.getItem('math_app_users')) || []; }
+  catch (e) { return []; }
+}
+function saveUsers(arr) { localStorage.setItem('math_app_users', JSON.stringify(arr)); }
+function getUser(id) { return loadUsers().find(u => u.id === id) || null; }
+
+// אובייקט הריצה של הילד הנוכחי: מאחד את פרטי הילד עם מסלול הכיתה שלו
+function profileOf(u) {
+  const g = CONFIG.grades[u.gradeId] || {}, th = THEMES[u.themeKey] || {};
+  return {
+    id: u.id, name: u.name, emoji: u.emoji, themeKey: u.themeKey,
+    grade: g.label, input: g.input, levels: g.levels || [],
+    trackVersion: g.trackVersion, startLevel: g.startLevel || 0,
+    color: th.color || '#a855f7'
+  };
+}
+
+function storageKey(id) { return 'math_app_user_' + id; }
 
 function loadState(id) {
-  const p = CONFIG.profiles[id];
+  const u = getUser(id);
+  const g = u ? CONFIG.grades[u.gradeId] : null;
   try {
     const raw = localStorage.getItem(storageKey(id));
     if (raw) {
       const parsed = JSON.parse(raw);
-      const def = defaultState(p);
-      const st = Object.assign(def, parsed, { session: Object.assign({ done: 0, correct: 0 }, parsed.session) });
+      const def = defaultState(g);
+      const s = Object.assign(def, parsed, { session: Object.assign({ done: 0, correct: 0 }, parsed.session) });
       // מסלול הרמות השתנה בקוד — שומרים כוכבים וסטטיסטיקות, מתחילים מנקודת הפתיחה החדשה
       const savedVer = parsed.trackVersion || 1;
-      if (savedVer !== p.trackVersion) {
-        st.trackVersion = p.trackVersion;
-        st.level = p.startLevel || 0;
-        st.consecutive = 0;
-        st.reinforce = null;
-        st.wrongRun = {};
-        st.session = { done: 0, correct: 0 };
+      if (g && savedVer !== g.trackVersion) {
+        s.trackVersion = g.trackVersion;
+        s.level = g.startLevel || 0;
+        s.consecutive = 0;
+        s.reinforce = null;
+        s.wrongRun = {};
+        s.session = { done: 0, correct: 0 };
       }
-      return st;
+      return s;
     }
-  } catch (e) { /* פרופיל חדש */ }
-  return defaultState(p);
+  } catch (e) { /* ילד חדש */ }
+  return defaultState(g);
 }
 function saveState() { if (curId && st) localStorage.setItem(storageKey(curId), JSON.stringify(st)); }
 
@@ -778,36 +1231,188 @@ function showScreen(id) {
 function renderHome() {
   const wrap = $('profileButtons');
   wrap.innerHTML = '';
-  for (const id in CONFIG.profiles) {
-    const p = CONFIG.profiles[id];
-    const s = loadState(id);
-    const lvl = p.levels[Math.min(s.level, p.levels.length - 1)].title;
+  const users = loadUsers();
+  users.forEach(u => {
+    const p = profileOf(u);
+    const s = loadState(u.id);
+    const t = THEMES[u.themeKey] || THEMES.space;
+    const lvl = p.levels.length ? p.levels[Math.min(s.level, p.levels.length - 1)].title : '';
     const btn = document.createElement('button');
-    const t = THEMES[id];
     btn.className = 'profile-btn';
-    btn.style.background = 'linear-gradient(135deg,' + p.color + 'e6,' + p.color + 'b3), url(' + t.bg + ') center/cover';
-    btn.innerHTML = '<span class="pe">' + p.emoji + '</span><span><div class="pn">' + p.name +
+    btn.style.background = 'linear-gradient(135deg,' + t.color + 'e6,' + t.color + 'b3), url(' + t.bg + ') center/cover';
+    btn.innerHTML = '<span class="pe">' + u.emoji + '</span><span><div class="pn">' + u.name +
       '</div><div class="pw">' + t.worldEmoji + ' ' + t.world +
       '</div><div class="pi">' + p.grade + ' · ⭐ ' + s.stars + ' · ' + lvl + '</div></span>';
-    btn.onclick = () => startChild(id);
+    btn.onclick = () => startChild(u.id);
     wrap.appendChild(btn);
-  }
+  });
+  // כרטיס הוספת ילד חדש
+  const add = document.createElement('button');
+  add.className = 'profile-btn add-child';
+  add.innerHTML = '<span class="pe">➕</span><span><div class="pn">ילד חדש</div>' +
+    '<div class="pi">הרשמה ומבחן מיקום קצר</div></span>';
+  add.onclick = openRegister;
+  wrap.appendChild(add);
 }
 
-function goHome() { saveState(); curId = null; clearTheme(); renderHome(); showScreen('screen-home'); }
+function goHome() { saveState(); curId = null; curProfile = null; clearTheme(); renderHome(); showScreen('screen-home'); }
+
+/* ---------- הרשמה ---------- */
+let regGrade = null;
+function openRegister() {
+  regGrade = null;
+  $('regName').value = '';
+  $('regMsg').textContent = '';
+  const grid = $('regGrades');
+  grid.innerHTML = '';
+  GRADE_ORDER.filter(g => CONFIG.grades[g]).forEach(gid => {
+    const b = document.createElement('button');
+    b.className = 'grade-btn';
+    b.textContent = CONFIG.grades[gid].short;
+    b.onclick = () => {
+      regGrade = gid;
+      grid.querySelectorAll('.grade-btn').forEach(x => x.classList.remove('sel'));
+      b.classList.add('sel');
+    };
+    grid.appendChild(b);
+  });
+  clearTheme();
+  showScreen('screen-register');
+}
+
+function submitRegister() {
+  const name = $('regName').value.trim();
+  if (!name) { $('regMsg').textContent = 'כתבי את השם שלך 🙂'; return; }
+  if (!regGrade) { $('regMsg').textContent = 'בחרי כיתה 🙂'; return; }
+  const user = {
+    id: 'u' + Date.now() + ri(100, 999),
+    name: name,
+    gradeId: regGrade,
+    themeKey: pick(THEME_KEYS),
+    emoji: pick(AVATAR_EMOJIS)
+  };
+  const users = loadUsers();
+  users.push(user);
+  saveUsers(users);
+  startPlacement(user.id);
+}
+
+/* ---------- מבחן מיקום ---------- */
+let plc = null, plcTyped = '';
+
+function buildPlacementQs(levels, total) {
+  const L = levels.length, qs = [];
+  for (let k = 0; k < total; k++) {
+    const idx = total > 1 ? Math.round(k * (L - 1) / (total - 1)) : 0;
+    const lvl = levels[Math.min(idx, L - 1)];
+    qs.push(genExercise(pick(lvl.types), false));
+  }
+  return qs;
+}
+
+function startPlacement(userId) {
+  const u = getUser(userId);
+  if (!u) { goHome(); return; }
+  curId = userId;
+  curProfile = profileOf(u);
+  applyTheme(curProfile.themeKey);
+  const total = Math.min(6, curProfile.levels.length + 1);
+  plc = { i: 0, total: total, correct: 0, qs: buildPlacementQs(curProfile.levels, total) };
+  showScreen('screen-placement');
+  renderPlacement();
+}
+
+function renderPlacement() {
+  const q = plc.qs[plc.i];
+  $('plcProg').textContent = 'שאלה ' + (plc.i + 1) + ' מתוך ' + plc.total;
+  const dots = $('plcDots');
+  dots.innerHTML = '';
+  for (let i = 0; i < plc.total; i++) {
+    const d = document.createElement('span');
+    if (i < plc.i) d.classList.add('on');
+    dots.appendChild(d);
+  }
+  $('plcPrompt').textContent = q.prompt || '';
+  $('plcVisual').innerHTML = q.visual || '';
+  const line = $('plcLine');
+  line.className = 'exline' + (q.emojiLine ? ' emoji-line' : '') + ((q.line || '').length > 16 ? ' long' : '');
+  plcTyped = '';
+  if (q.mode === 'numpad') {
+    line.style.display = 'flex';
+    line.innerHTML = (q.line || '?').replace('?', '<span class="ansbox" id="plcBox">&nbsp;</span>');
+    $('plcChoices').innerHTML = '';
+    renderPlcNumpad();
+  } else {
+    line.style.display = q.line ? 'flex' : 'none';
+    line.innerHTML = q.line || '';
+    $('plcNumpad').innerHTML = '';
+    renderPlcChoices(q);
+  }
+  const card = $('plcCard');
+  card.classList.remove('in'); void card.offsetWidth; card.classList.add('in');
+}
+
+function renderPlcNumpad() {
+  const np = $('plcNumpad');
+  np.innerHTML = '';
+  ['1','2','3','4','5','6','7','8','9','del','0','ok'].forEach(k => {
+    const b = document.createElement('button');
+    if (k === 'del') { b.className = 'key del'; b.textContent = '⌫'; b.onclick = () => { plcTyped = plcTyped.slice(0, -1); plcDrawTyped(); }; }
+    else if (k === 'ok') { b.className = 'key ok'; b.textContent = '✓'; b.onclick = () => { if (plcTyped !== '') plcSubmit(Number(plcTyped)); }; }
+    else { b.className = 'key'; b.textContent = k; b.onclick = () => { if (plcTyped.length < 4) { plcTyped += k; plcDrawTyped(); } }; }
+    np.appendChild(b);
+  });
+  plcDrawTyped();
+}
+function plcDrawTyped() { const box = $('plcBox'); if (box) box.textContent = plcTyped === '' ? ' ' : plcTyped; }
+
+function renderPlcChoices(q) {
+  const ch = $('plcChoices');
+  ch.innerHTML = '';
+  q.options.forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'choice' + (!o.html && isNaN(o.value) ? ' text' : '');
+    b.innerHTML = o.html || o.label;
+    b.onclick = () => plcSubmit(o.value);
+    ch.appendChild(b);
+  });
+}
+
+function plcSubmit(val) {
+  if (val === plc.qs[plc.i].answer) plc.correct++;
+  plc.i++;
+  if (plc.i >= plc.total) finishPlacement();
+  else renderPlacement();
+}
+
+function finishPlacement() {
+  const u = getUser(curId);
+  const g = CONFIG.grades[u.gradeId];
+  const lvls = g.levels || [];
+  const start = placementStartLevel(plc.correct, plc.total, lvls.length);
+  const s = defaultState(g);
+  s.level = start;
+  localStorage.setItem(storageKey(curId), JSON.stringify(s));
+  startChild(curId);
+  const title = lvls.length ? lvls[Math.min(start, lvls.length - 1)].title : '';
+  queueBanner('🚀', 'מתחילים, ' + u.name + '!', 'רמת פתיחה: ' + title);
+}
 
 /* ---------- משחק ---------- */
 function startChild(id) {
+  const u = getUser(id);
+  if (!u) { goHome(); return; }
   curId = id;
+  curProfile = profileOf(u);
   st = loadState(id);
-  applyTheme(id);
+  applyTheme(curProfile.themeKey);
   showScreen('screen-game');
   updateHud();
   nextExercise();
 }
 
 function updateHud() {
-  const p = CONFIG.profiles[curId];
+  const p = curProfile;
   $('gName').textContent = p.name;
   $('gEmoji').textContent = p.emoji;
   $('gStars').textContent = st.stars;
@@ -824,7 +1429,7 @@ function updateHud() {
 
 // שביל מיני: נקודה לכל רמה במסלול, הנוכחית פועמת. לחיצה פותחת את מפת המסע.
 function renderTrail() {
-  const p = CONFIG.profiles[curId];
+  const p = curProfile;
   const cur = Math.min(st.level, p.levels.length - 1);
   let dots = '';
   for (let i = 0; i < p.levels.length; i++) {
@@ -847,7 +1452,7 @@ function openJourney(justAdvanced) {
 }
 
 function renderJourney(justAdvanced) {
-  const p = CONFIG.profiles[curId], t = THEMES[curId];
+  const p = curProfile, t = THEMES[curProfile.themeKey];
   $('journeyTitle').textContent = t.worldEmoji + ' ' + t.world;
   const wrap = $('journeyPath');
   wrap.innerHTML = '';
@@ -869,7 +1474,7 @@ function renderJourney(justAdvanced) {
 }
 
 function nextExercise() {
-  const p = CONFIG.profiles[curId];
+  const p = curProfile;
   const sel = chooseType(p, st);
   ex = genExercise(sel.type, sel.easy);
   attempts = 0; typed = ''; locked = false;
@@ -935,7 +1540,7 @@ function submitAnswer(val) {
 function onCorrect() {
   locked = true;
   playCorrect();
-  const p = CONFIG.profiles[curId];
+  const p = curProfile;
   const firstTry = attempts === 0;
   let leveledUp = false;
   if (firstTry) {
@@ -959,7 +1564,7 @@ function onCorrect() {
   starFly();
   setMascot('cheer');
   const fb = $('feedback');
-  fb.textContent = pick(['נכון! 🎉', 'מעולה! 🌟', 'איזה יופי! 💜', 'בדיוק! 🦄'].concat(THEMES[curId].praise));
+  fb.textContent = pick(['נכון! 🎉', 'מעולה! 🌟', 'איזה יופי! 💜', 'בדיוק! 🦄'].concat(THEMES[curProfile.themeKey].praise));
   fb.className = 'good';
   updateHud();
   setTimeout(() => {
@@ -976,7 +1581,7 @@ function onWrong() {
   attempts++;
   playWrong();
   setMascot('nudge');
-  const p = CONFIG.profiles[curId];
+  const p = curProfile;
   const card = $('exCard');
   card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
   const fb = $('feedback');
@@ -1017,10 +1622,10 @@ function endSession() {
   st.session = { done: 0, correct: 0 };
   saveState();
   confetti();
-  const t = THEMES[curId];
+  const t = THEMES[curProfile.themeKey];
   $('celebArt').innerHTML = '<img class="celeb-mascot" src="' + t.mascot.cheer +
     '" onerror="this.parentNode.textContent=\'🎊🌟🎊\'" alt="">';
-  $('celebTitle').textContent = pick(t.praise) + ' כל הכבוד, ' + CONFIG.profiles[curId].name + '!';
+  $('celebTitle').textContent = pick(t.praise) + ' כל הכבוד, ' + curProfile.name + '!';
   $('celebSub').textContent = 'סיימת ' + CONFIG.sessionLength + ' תרגילים — ' + correct +
     ' נכונים בניסיון ראשון! ⭐ יש לך כבר ' + st.stars + ' כוכבים';
   showScreen('screen-celebrate');
@@ -1138,8 +1743,15 @@ function checkGate() {
 function renderParents() {
   const wrap = $('parentsPanels');
   wrap.innerHTML = '';
-  for (const id in CONFIG.profiles) {
-    const p = CONFIG.profiles[id];
+  const users = loadUsers();
+  if (!users.length) {
+    wrap.innerHTML = '<div class="panel" style="color:#a89cc0">עדיין לא נרשמו ילדים 🙂</div>';
+    showScreen('screen-parents');
+    return;
+  }
+  for (const u of users) {
+    const id = u.id;
+    const p = profileOf(u);
     const s = loadState(id);
     let total = 0, totalC = 0, rows = '', strong = '', weak = '';
     for (const t in s.stats) {
@@ -1163,17 +1775,24 @@ function renderParents() {
       (strong ? '<div>חזקה ב: ' + strong + '</div>' : '') +
       (weak ? '<div>כדאי לחזק: ' + weak + '</div>' : '') +
       (rows ? '<div style="margin-top:8px">' + rows + '</div>' : '<div style="color:#a89cc0">עדיין אין נתונים — שתתחיל לשחק! 🙂</div>') +
-      '<button class="reset-btn" data-id="' + id + '">איפוס פרופיל</button>';
+      '<div class="panel-actions"><button class="reset-btn" data-id="' + id + '">איפוס התקדמות</button>' +
+      '<button class="reset-btn del-btn" data-id="' + id + '">מחיקת ילד</button></div>';
     wrap.appendChild(panel);
   }
   wrap.querySelectorAll('.reset-btn').forEach(b => {
+    const isDel = b.classList.contains('del-btn');
     b.onclick = () => {
       if (b.dataset.confirm) {
-        localStorage.removeItem(storageKey(b.dataset.id));
+        if (isDel) {
+          saveUsers(loadUsers().filter(u => u.id !== b.dataset.id));
+          localStorage.removeItem(storageKey(b.dataset.id));
+        } else {
+          localStorage.removeItem(storageKey(b.dataset.id));
+        }
         renderParents();
       } else {
         b.dataset.confirm = '1';
-        b.textContent = 'בטוחים? לחצו שוב לאיפוס סופי';
+        b.textContent = isDel ? 'בטוחים? מחיקה סופית' : 'בטוחים? איפוס סופי';
       }
     };
   });
@@ -1184,7 +1803,8 @@ function renderParents() {
 window.addEventListener('load', () => {
   renderHome();
   const h = location.hash.replace('#', '');
-  if (CONFIG.profiles[h]) startChild(h);   // קישור ישיר לפרופיל (וגם לבדיקות)
+  if (h === 'register') openRegister();        // קיצור להרשמה (גם לבדיקות)
+  else if (h && getUser(h)) startChild(h);     // קישור ישיר לילד לפי ה-id שלו
   // רישום service worker — מאפשר התקנה כאפליקציה (standalone) ועבודה אופליין.
   // לא רץ מ-file:// או בבדיקות (navigator לא קיים שם), לכן עטוף בבדיקה.
   if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
